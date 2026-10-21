@@ -1,0 +1,47 @@
+# ==========================================
+# AutoSMS Framework - Git Ignore Rules
+# ==========================================
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution & Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Project outputs & temporary execution caches
+output/
+output_test/
+*.npy
+*.csv.cache
+*.log
+
+# Generated user documents & Word deliverables
+*.docx
+*.pptx
+
+# Prohibited copyright files (PDF books, full papers)
+*.pdf
+Hands-On-Large-Language-Models.pdf
+
+# Local customized configuration (preserve config_template.json and test_config.json)
+sms_config.json
+.env

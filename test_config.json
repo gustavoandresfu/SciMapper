@@ -1,0 +1,38 @@
+{
+  "project_metadata": {
+    "title": "Mapeo Sistemático de la Literatura: Generative AI in Software Testing",
+    "short_name": "SMS_GenAI_Testing",
+    "authors": ["Investigador Principal", "Coautor"],
+    "temporal_window": [2019, 2026],
+    "output_dir": "./output_test"
+  },
+  "research_questions": {
+    "RQ1": "¿Cuáles son las técnicas de modelos de lenguaje más utilizadas para la generación de casos de prueba?",
+    "RQ2": "¿Qué métricas empíricas de cobertura de código y tasa de detección de fallos se reportan?",
+    "RQ3": "¿Cuáles son los desafíos éticos, alucinaciones y limitaciones de reproducibilidad observadas?"
+  },
+  "search_strategy": {
+    "openalex_email": "academic_researcher@universidad.edu",
+    "max_results_per_query": 35,
+    "queries": [
+      "\"generative ai\" AND \"software testing\"",
+      "\"large language models\" AND \"test case generation\""
+    ]
+  },
+  "nlp_tuning": {
+    "domain_preset": "software_engineering",
+    "domain_presets_catalog": {
+      "software_engineering": "sentence-transformers/all-MiniLM-L6-v2",
+      "biomedical_health": "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract"
+    },
+    "n_clusters": 4,
+    "dimensionality_reduction": "pca_tsne"
+  },
+  "qualitative_synthesis": {
+    "candidates_per_topic": 3
+  },
+  "prisma_audit": {
+    "deduplication_keys": ["doi", "title_hash"],
+    "quality_threshold": 3.5
+  }
+}

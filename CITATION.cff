@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software in your research or systematic reviews, please cite it as below."
+authors:
+  - family-names: "Futo"
+    given-names: "Gustavo Andrés"
+    email: "gustavoandresfu@gmail.com"
+title: "SciMapper: Automated Scientific Mapping & Systematic Literature Reviews with Dense Semantic Clustering and PRISMA 2020 Compliance"
+version: 1.0.0
+date-released: 2026-10-21
+url: "https://github.com/gustavoandresfu/SciMapper"
+keywords:
+  - "systematic literature review"
+  - "systematic mapping study"
+  - "scientific mapping"
+  - "evidence synthesis"
+  - "topic modeling"
+  - "PRISMA 2020"
+  - "sentence embeddings"
+  - "c-TF-IDF"
+license: MIT
