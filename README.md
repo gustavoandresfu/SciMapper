@@ -93,6 +93,11 @@ Customize `sms_config.json` with your research questions, search queries, and do
     "temporal_window": [2019, 2026],
     "output_dir": "./output"
   },
+  "research_questions": {
+    "RQ1": "What foundational architectures and LLMs are predominantly adopted in clinical workflows?",
+    "RQ2": "What empirical metrics and validation benchmarks are reported for diagnostic accuracy?",
+    "RQ3": "What open challenges regarding hallucinations and ethical safety remain unaddressed?"
+  },
   "search_strategy": {
     "openalex_email": "researcher@university.edu",
     "max_results_per_query": 100,

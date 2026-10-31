@@ -46,15 +46,61 @@ En tu consola, ejecuta:
 ```bash
 python main.py --init
 ```
-Esto creará un archivo `sms_config.json` listo para personalizar:
-* **Metadatos y RQs**: Título, autores, ventana temporal (ej. 2018–2026) y tus preguntas de investigación (RQ1, RQ2, RQ3).
-* **Consultas de Búsqueda**: Cadenas booleanas para OpenAlex.
-* **Modelo por Dominio (`domain_preset`)**:
-  * `"software_engineering"`: `all-MiniLM-L6-v2` (Software / CS)
-  * `"biomedical_health"`: `PubMedBERT` (Salud y Medicina)
-  * `"scientific_general"`: `SciBERT` (Ciencias exactas / Naturales)
-  * `"finance_business"`: `FinBERT` (Economía y Negocios)
-  * `"multilingual"`: `paraphrase-multilingual-MiniLM` (Español u otros idiomas)
+Esto creará un archivo `sms_config.json` listo para personalizar.
+
+#### Ejemplo de archivo `sms_config.json`:
+```json
+{
+  "project_metadata": {
+    "title": "Mapeo Sistemático de la Literatura: [Tu Tema]",
+    "short_name": "SMS_Proyecto",
+    "authors": ["Investigador Principal", "Coautor"],
+    "temporal_window": [2019, 2026],
+    "output_dir": "./output"
+  },
+  "research_questions": {
+    "RQ1": "¿Cuáles son los enfoques y técnicas principales reportadas en la literatura?",
+    "RQ2": "¿Qué métricas empíricas de evaluación se reportan?",
+    "RQ3": "¿Cuáles son las limitaciones, desafíos abiertos y vacíos de investigación?"
+  },
+  "search_strategy": {
+    "openalex_email": "tu_email@universidad.edu",
+    "max_results_per_query": 100,
+    "queries": [
+      "\"primary topic\" AND (\"secondary keyword\" OR \"alternative keyword\")",
+      "\"methodology keyword\" AND \"domain keyword\""
+    ]
+  },
+  "nlp_tuning": {
+    "domain_preset": "software_engineering",
+    "n_clusters": 6
+  }
+}
+```
+
+#### 🧭 Guía de Configuración: ¿Para qué sirve cada campo?
+
+| Bloque / Campo | ¿Qué defines aquí? | ¿Qué impacto real tiene en el proceso? |
+| :--- | :--- | :--- |
+| **`title` y `authors`** | Título de tu estudio y nombres del equipo. | Portada y encabezados formales del documento Word (`.docx`). |
+| **`temporal_window`** | Rango de años a estudiar (ej. `[2019, 2026]`). | Filtra las publicaciones y calcula el radar de madurez/crecimiento temporal (CAGR). |
+| **`search_strategy.queries`** | Cadenas de búsqueda booleanas (`AND`, `OR`, `""`). | **Es lo que realmente trae los artículos.** Se envían a la API de OpenAlex para recolectar el corpus. |
+| **`search_strategy.max_results_per_query`** | Cantidad máxima de papers por cada búsqueda (ej. `100`). | Controla el volumen inicial de literatura a procesar para no sobrecargar la muestra. |
+| **`research_questions` (RQs)** | Tus preguntas de investigación en lenguaje natural. | **Estructura editorial y metodológica.** (Ver nota a continuación). |
+| **`domain_preset`** | El área del conocimiento (ver catálogo abajo). | Selecciona el modelo de lenguaje de IA (Transformer) óptimo para entender el vocabulario de tu disciplina. |
+| **`n_clusters`** | Cantidad de grupos temáticos a descubrir (ej. `5` o `6`). | Divide matemáticamente el corpus en esa cantidad de familias conceptuales. |
+
+> [!NOTE]
+> **Sinergia del Framework: Cómo se complementan las Búsquedas y las Preguntas**
+> * **Los Términos de Búsqueda (`queries`) — El Motor de Recolección e IA:** Son los encargados de conectar con los repositorios académicos (OpenAlex) para recuperar la literatura relevante. Constituyen la base empírica del estudio: a partir de los títulos y resúmenes recolectados, los modelos de lenguaje (Transformers) y los algoritmos de agrupamiento (K-Means / c-TF-IDF) descubren los patrones temáticos de forma objetiva.
+> * **El Tema (`title`) y las Preguntas (`RQs`) — La Brújula Metodológica y Editorial:** Definen el propósito y el marco conceptual de la investigación. Guían al investigador al momento de interpretar los temas descubiertos y estructuran automáticamente el manuscrito formal en Word (`.docx`), integrando la Introducción, los objetivos del estudio y la matriz de análisis cualitativo en la Discusión.
+
+#### Catálogo de Modelos por Dominio (`domain_preset`):
+* `"software_engineering"`: `all-MiniLM-L6-v2` (Ingeniería de Software / CS)
+* `"biomedical_health"`: `PubMedBERT` (Salud, Medicina y Biología)
+* `"scientific_general"`: `SciBERT` (Ciencias exactas / Naturales)
+* `"finance_business"`: `FinBERT` (Economía, Finanzas y Negocios)
+* `"multilingual"`: `paraphrase-multilingual-MiniLM` (Español u otros idiomas no ingleses)
 
 ---
 
