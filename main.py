@@ -44,14 +44,138 @@ def load_config(config_path: str) -> dict:
     with open(config_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def cmd_init(target_path: str = "sms_config.json"):
+def cmd_init(target_path: str = "sms_config.json", quick: bool = False):
     template_path = os.path.join(os.path.dirname(__file__), "config_template.json")
     if os.path.exists(target_path):
-        print(f"⚠️ El archivo '{target_path}' ya existe. No se sobrescribirá.")
+        print(f"⚠️ El archivo '{target_path}' ya existe.")
+        try:
+            if sys.stdin.isatty() and not quick:
+                resp = input("   ¿Deseas sobrescribirlo con una nueva configuración? (s/N): ").strip().lower()
+                if resp not in ["s", "si", "y", "yes"]:
+                    print("Operación cancelada. El archivo original no fue modificado.")
+                    return
+            else:
+                print("   No se sobrescribirá. Usa otro nombre con --config si deseas crear uno nuevo.")
+                return
+        except Exception:
+            return
+
+    with open(template_path, "r", encoding="utf-8") as f:
+        cfg = json.load(f)
+
+    # Si se pide quick o no hay terminal interactiva (TTY), copiar plantilla estándar
+    if quick or not sys.stdin.isatty():
+        with open(target_path, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+        print(f"✅ Plantilla estándar creada con éxito en: {target_path}")
+        print("📝 Ábrelo y personaliza tus preguntas de investigación (RQs), consultas OpenAlex y preset de dominio.")
         return
-    shutil.copy(template_path, target_path)
-    print(f"✅ Plantilla de configuración creada con éxito en: {target_path}")
-    print("📝 Ábrelo y personaliza tus preguntas de investigación (RQs), consultas OpenAlex y preset de dominio.")
+
+    # Asistente interactivo
+    print("=" * 70)
+    print("🚀 SciMapper - Asistente Interactivo de Inicialización")
+    print("======================================================================")
+    print("Configura los datos clave de tu proyecto en pocos pasos.")
+    print("(Presiona [Enter] en cualquier opción para aceptar el valor por defecto)\n")
+
+    def prompt(text: str, default: str) -> str:
+        try:
+            val = input(f"{text} [{default}]: ").strip()
+            return val if val else default
+        except (EOFError, KeyboardInterrupt):
+            print("\nOperación cancelada.")
+            sys.exit(0)
+
+    # 1. Metadatos
+    title = prompt("1. Título formal del estudio", cfg.get("project_metadata", {}).get("title", "Mapeo Sistemático"))
+    short_name = prompt("2. Identificador corto del proyecto", "SMS_Estudio")
+    author = prompt("3. Autor(es) principal(es)", "Investigador Principal")
+    email = prompt("4. Correo de contacto (cortesía OpenAlex API)", "investigador@universidad.edu")
+
+    # 2. Catálogo de disciplinas
+    presets = [
+        ("software_engineering", "💻 Computación, Software e Inteligencia Artificial", "all-MiniLM-L6-v2"),
+        ("biomedical_health", "🩺 Medicina, Salud, Biología y Farmacia", "PubMedBERT"),
+        ("scientific_general", "🔬 Ciencias Exactas y Naturales (Física/Química)", "SciBERT"),
+        ("finance_business", "📈 Economía, Finanzas y Negocios", "FinBERT"),
+        ("multilingual", "🌐 Multilingüe / Literatura en Español", "Multilingual-MiniLM")
+    ]
+
+    print("\n5. Selecciona la disciplina de tu investigación:")
+    for idx, (code, label, model_short) in enumerate(presets, 1):
+        print(f"   [{idx}] {label} ({model_short})")
+
+    sel_idx = 1
+    while True:
+        choice = prompt("   Elige una opción (1-5)", "1")
+        if choice.isdigit() and 1 <= int(choice) <= len(presets):
+            sel_idx = int(choice)
+            break
+        print("   ⚠️ Por favor, ingresa un número válido entre 1 y 5.")
+
+    chosen_preset, chosen_label, chosen_model = presets[sel_idx - 1]
+
+    # 3. Cantidad de clusters
+    n_clusters = 6
+    while True:
+        c_val = prompt("\n6. Cantidad sugerida de familias/clusters a descubrir (3-10)", "6")
+        if c_val.isdigit() and 3 <= int(c_val) <= 12:
+            n_clusters = int(c_val)
+            break
+        print("   ⚠️ Ingresa un número entre 3 y 10.")
+
+    # 4. Estrategia de búsqueda iterativa con guía de buenas prácticas
+    print("\n7. Estrategia de Búsqueda Académica (OpenAlex):")
+    print("   💡 Buenas prácticas metodológicas:")
+    print("      • Usa comillas dobles para frases exactas: \"deep learning\"")
+    print("      • Cruza conceptos con AND: \"machine learning\" AND \"cardiology\"")
+    print("      • Usa OR entre paréntesis para sinónimos: (\"llm\" OR \"generative ai\") AND \"testing\"")
+    print("   (Puedes ingresar 1 o varias consultas. Presiona [Enter] sin texto para finalizar)\n")
+
+    user_queries = []
+    q_num = 1
+    while True:
+        prompt_label = f"   • Consulta de búsqueda #{q_num}" + (" (Enter para usar ejemplos)" if q_num == 1 else " (opcional, Enter para finalizar)")
+        q_val = prompt(prompt_label, "").strip()
+
+        if not q_val:
+            if q_num == 1:
+                print("   ℹ️ Se mantendrán las consultas de ejemplo predeterminadas.")
+            break
+
+        # Ayuda preventiva: si el usuario no usó comillas y tiene espacios, advertir amigablemente
+        if '"' not in q_val and " " in q_val and " AND " not in q_val:
+            print("     💡 Tip: No incluiste comillas ni AND. Se recomienda buscar frases exactas como: \"...\".")
+
+        user_queries.append(q_val)
+        print(f"     ✔ Consulta #{q_num} agregada con éxito.")
+        q_num += 1
+
+    # Actualizar la configuración
+    cfg["project_metadata"]["title"] = title
+    cfg["project_metadata"]["short_name"] = short_name
+    cfg["project_metadata"]["authors"] = [a.strip() for a in author.split(",")]
+    cfg["search_strategy"]["openalex_email"] = email
+    cfg["nlp_tuning"]["domain_preset"] = chosen_preset
+    cfg["nlp_tuning"]["n_clusters"] = n_clusters
+
+    if user_queries:
+        cfg["search_strategy"]["queries"] = user_queries
+
+    with open(target_path, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, indent=2, ensure_ascii=False)
+
+    print("\n" + "=" * 70)
+    print(f"🎉 ¡Proyecto configurado exitosamente en: '{target_path}'!")
+    print(f"   • Disciplina: {chosen_label}")
+    print(f"   • Modelo IA:  {chosen_model}")
+    print(f"   • Clusters:   {n_clusters}")
+    print("=" * 70)
+    print("👉 Próximos pasos:")
+    print(f"   1. Abre '{target_path}' si deseas ajustar tus preguntas (RQs) o añadir más queries.")
+    print(f"   2. Ejecuta la búsqueda y agrupamiento con:")
+    print(f"      python main.py --run-discovery --config {target_path}")
+    print("=" * 70)
 
 def cmd_run_discovery(config: dict, config_path: str):
     print("=" * 70)
@@ -196,7 +320,8 @@ def main():
         description="SciMapper: Automated Scientific Mapping & Systematic Literature Reviews with Dense Semantic Clustering.",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("--init", action="store_true", help="Genera una plantilla 'sms_config.json' para un nuevo proyecto.")
+    parser.add_argument("--init", action="store_true", help="Genera una plantilla 'sms_config.json' para un nuevo proyecto (asistente guiado).")
+    parser.add_argument("--quick", action="store_true", help="Genera la plantilla directamente sin abrir el asistente interactivo.")
     parser.add_argument("--config", type=str, default="sms_config.json", help="Ruta al archivo de configuración JSON.")
     parser.add_argument("--run-discovery", action="store_true", help="Fase 1: Recolecta artículos, genera embeddings, clusters, discovered_topics.json y candidatos a discusión.")
     parser.add_argument("--recommend-papers", action="store_true", help="Reejecuta el recomendador estratificado de artículos para la discusión.")
@@ -207,7 +332,7 @@ def main():
     args = parser.parse_args()
 
     if args.init:
-        cmd_init(args.config)
+        cmd_init(args.config, quick=args.quick)
         return
 
     if args.run_discovery:

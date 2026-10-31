@@ -74,15 +74,16 @@ pip install -e .
 
 ### 2. Initialize a Project
 
-Generate a baseline configuration file:
+Launch the interactive configuration wizard (prompts for domain preset, search queries, and project metadata):
 
 ```bash
 python main.py --init
 # Or if installed via pip:
 scimapper --init
 ```
+*(Or use `python main.py --init --quick` to generate the baseline template directly without prompts).*
 
-Customize `sms_config.json` with your research questions, search queries, and domain preset:
+The generated `sms_config.json` is ready to inspect and refine:
 
 ```json
 {

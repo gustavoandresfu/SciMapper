@@ -46,7 +46,9 @@ En tu consola, ejecuta:
 ```bash
 python main.py --init
 ```
-Esto creará un archivo `sms_config.json` listo para personalizar.
+El sistema iniciará un **asistente guiado interactivo** en la consola que te pedirá el título del estudio y te mostrará un **menú numerado (1 a 5) para elegir tu disciplina** (Medicina, Software, Negocios, etc.), configurando automáticamente el modelo de lenguaje correspondiente.
+
+*(Si prefieres generar directamente la plantilla sin preguntas, puedes ejecutar `python main.py --init --quick`).*
 
 #### Ejemplo de archivo `sms_config.json`:
 ```json
@@ -94,6 +96,13 @@ Esto creará un archivo `sms_config.json` listo para personalizar.
 > **Sinergia del Framework: Cómo se complementan las Búsquedas y las Preguntas**
 > * **Los Términos de Búsqueda (`queries`) — El Motor de Recolección e IA:** Son los encargados de conectar con los repositorios académicos (OpenAlex) para recuperar la literatura relevante. Constituyen la base empírica del estudio: a partir de los títulos y resúmenes recolectados, los modelos de lenguaje (Transformers) y los algoritmos de agrupamiento (K-Means / c-TF-IDF) descubren los patrones temáticos de forma objetiva.
 > * **El Tema (`title`) y las Preguntas (`RQs`) — La Brújula Metodológica y Editorial:** Definen el propósito y el marco conceptual de la investigación. Guían al investigador al momento de interpretar los temas descubiertos y estructuran automáticamente el manuscrito formal en Word (`.docx`), integrando la Introducción, los objetivos del estudio y la matriz de análisis cualitativo en la Discusión.
+
+> [!TIP]
+> **Fórmula recomendada para los términos de búsqueda (`queries`):**
+> * **Comillas dobles para frases exactas:** Usa `"deep learning"` en lugar de `deep learning` suelto.
+> * **Cruzar con `AND` en mayúsculas:** Cruza la tecnología con el dominio (ej. `"machine learning" AND "cardiology"`).
+> * **Sinónimos con `OR` entre paréntesis:** Ej: `("large language models" OR "llm") AND "code generation"`.
+> * **Consultas múltiples y precisas:** Es preferible ingresar 2 o 3 consultas concisas que una sola cadena excesivamente larga.
 
 #### Catálogo de Modelos por Dominio (`domain_preset`):
 * `"software_engineering"`: `all-MiniLM-L6-v2` (Ingeniería de Software / CS)
