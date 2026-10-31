@@ -12,6 +12,8 @@
 **An end-to-end, domain-agnostic framework designed to conduct reproducible Systematic Literature Reviews (SLR) and Systematic Mapping Studies (SMS).**  
 It automates academic corpus harvesting, deduplication, dense semantic embedding, unsupervised clustering, taxonomic discovery, interactive 2D cartography, and manuscript drafting—while keeping **researchers firmly in the loop**.
 
+🌐 **Languages:** **English** • [Español (Guía en Castellano)](README_ES.md)
+
 [Quickstart](#-quickstart-in-3-steps) • [Architecture](#-framework-architecture) • [Comparison](#-comparison-with-the-state-of-the-art) • [Theoretical Foundation](#-theoretical-foundations) • [Citation](#-citation)
 
 </div>

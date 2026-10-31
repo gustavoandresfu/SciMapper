@@ -1,4 +1,6 @@
-# 🚀 AutoSMS Framework: Pipeline Configurable y Reutilizable para Mapeos Sistemáticos de Literatura
+# 🚀 SciMapper / AutoSMS Framework (Guía en Español)
+
+🌐 **Idiomas:** [English (Main README)](README.md) • **Español**
 
 Un framework agnóstico y modular diseñado para ejecutar **Mapeos Sistemáticos de Literatura (SMS)** y **Revisiones Sistemáticas (SLR)** bajo estándares académicos (**PRISMA 2020**), combinando **Machine Learning no supervisado**, **selección estratificada de literatura** y **supervisión humana continua (Human-in-the-Loop)**.
 
@@ -14,7 +16,8 @@ El framework reside en su propia carpeta aislada (`AutoSMS_Framework/`):
 AutoSMS_Framework/
 ├── config_template.json      <- Plantilla maestra de configuración
 ├── main.py                   <- Orquestador de línea de comandos (CLI)
-├── README_FRAMEWORK.md       <- Este manual de uso
+├── README_ES.md              <- Este manual de uso en español
+├── README.md                 <- Documentación formal en inglés (GitHub main)
 └── core/
     ├── collector.py          <- Ingesta de OpenAlex API, reconstrucción de abstracts y deduplicación
     ├── embedder.py           <- Modelos de lenguaje densos por dominio (Sentence-Transformers)
