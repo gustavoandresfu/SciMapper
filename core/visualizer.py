@@ -27,12 +27,12 @@ class AutoVisualizer:
             "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
         ]
 
-        # Crear figura con 2 subplots en paralelo: Mapa 2D (68%) y Líneas Temporales (32%)
+        # Crear figura con 2 subplots en paralelo: Mapa 2D (58%) y Líneas Temporales (42%)
         fig = make_subplots(
             rows=1, cols=2,
-            column_widths=[0.67, 0.33],
+            column_widths=[0.58, 0.42],
             subplot_titles=[
-                "<b>Mapa Semántico 2D y Densidad de Investigación (KDE)</b>",
+                "<b>Mapa Semántico 2D y Densidad de Investigación (t-SNE + KDE)</b>",
                 "<b>Dinámica y Trayectoria Temporal Anual</b>"
             ],
             horizontal_spacing=0.08
@@ -47,7 +47,7 @@ class AutoVisualizer:
             reversescale=False,
             showscale=False,
             ncontours=22,
-            opacity=0.38,
+            opacity=0.30,
             hoverinfo="skip"
         )
         fig.add_trace(kde_trace, row=1, col=1)
@@ -152,20 +152,19 @@ class AutoVisualizer:
                 x=[cx],
                 y=[cy],
                 mode="markers+text",
-                text=[f"<b>C{tid}: {t_name[:28]}</b>"],
+                text=[f"<b>C{tid}</b>"],
                 textposition="top center",
-                textfont=dict(size=10, color="#111111", family="Arial Black, Segoe UI, sans-serif"),
+                textfont=dict(size=12, color="#0f172a", family="Arial Black, Segoe UI, sans-serif"),
                 hovertext=[centroid_hover],
                 hoverinfo="text",
                 legendgroup=f"topic_{tid}",
                 showlegend=False,
-                marker=dict(size=15, symbol="diamond", color=color, line=dict(width=2, color="#ffffff"))
+                marker=dict(size=16, symbol="diamond", color=color, line=dict(width=2, color="#ffffff"))
             )
             fig.add_trace(centroid_trace, row=1, col=1)
             centroid_trace_indices.append(len(fig.data) - 1)
 
         # 3. Subplot 2: Evolución Temporal Anual (Líneas de tendencia)
-        # Identificar rango de años global
         years_series = pd.to_numeric(df["publication_year"], errors="coerce").dropna().astype(int)
         min_year = int(years_series.min()) if not years_series.empty else 2018
         max_year = int(years_series.max()) if not years_series.empty else 2026
@@ -186,9 +185,9 @@ class AutoVisualizer:
                 mode="lines+markers",
                 name=f"{t_name}",
                 legendgroup=f"topic_{tid}",
-                showlegend=False,  # Se vincula con la leyenda del scatter
-                line=dict(color=color, width=2.5),
-                marker=dict(size=6, color=color),
+                showlegend=False,
+                line=dict(color=color, width=2.8),
+                marker=dict(size=7, color=color),
                 hovertemplate=f"<b>{t_name}</b><br>Año %{{x}}: %{{y}} artículos<extra></extra>"
             )
             fig.add_trace(line_trace, row=1, col=2)
@@ -196,34 +195,32 @@ class AutoVisualizer:
         # 4. Botones de Control para Alternar Modos de Visualización (Updatemenus)
         total_traces = len(fig.data)
         
-        # Máscaras de visibilidad:
-        # 1. Vista Completa / Híbrida: Todo visible (KDE, Envolventes, Puntos, Centroides y Líneas)
         vis_all = [True] * total_traces
-        
-        # 2. Solo Regiones de Clusters: Hulls, Centroides, KDE y Líneas visibles (Puntos individuales ocultos)
         vis_regions = [True] * total_traces
         for p_idx in scatter_trace_indices:
             vis_regions[p_idx] = False
             
-        # 3. Solo Puntos: KDE y Hulls ocultos, Scatters, Centroides y Líneas visibles
         vis_points = [False] * total_traces
         for p_idx in scatter_trace_indices + centroid_trace_indices:
             vis_points[p_idx] = True
-        # Mantener líneas del subplot 2 visibles
         for l_idx in range(len(fig.data) - len(unique_topics), len(fig.data)):
             vis_points[l_idx] = True
 
         fig.update_layout(
+            autosize=True,
+            height=860,
+            template="plotly_white",
             updatemenus=[
                 dict(
                     type="buttons",
                     direction="right",
-                    x=0.01,
-                    y=1.12,
+                    x=1.0,
+                    xanchor="right",
+                    y=1.14,
                     showactive=True,
-                    bgcolor="#F0F4F8",
-                    bordercolor="#CCCCCC",
-                    font=dict(size=11, color="#333333"),
+                    bgcolor="#F8FAFC",
+                    bordercolor="#CBD5E1",
+                    font=dict(size=11, color="#1E293B"),
                     buttons=[
                         dict(label="🌟 Vista Completa (Regiones + Puntos + Densidad)", method="update", args=[{"visible": vis_all}]),
                         dict(label="🛡️ Solo Regiones y Fronteras de Clusters", method="update", args=[{"visible": vis_regions}]),
@@ -232,30 +229,38 @@ class AutoVisualizer:
                 )
             ],
             title={
-                'text': f"<b>{self.title}</b><br><sup>Mapeo Semántico 2D (t-SNE) + Densidad Topográfica (KDE) + Radar de Dinámica Temporal | {len(df)} Artículos</sup>",
-                'x': 0.05,
-                'xanchor': 'left'
+                'text': f"<b>{self.title}</b><br><span style='font-size:13px; color:#64748B; font-weight:normal;'>Mapeo Semántico 2D (t-SNE) + Densidad Topográfica (KDE) + Radar de Dinámica Temporal | {len(df)} Artículos Indexados</span>",
+                'x': 0.01,
+                'xanchor': 'left',
+                'y': 0.98,
+                'font': dict(size=17, color="#0F172A", family="Segoe UI, Inter, Arial, sans-serif")
             },
-            xaxis=dict(title="Dimensión Semántica 1", showgrid=True),
-            yaxis=dict(title="Dimensión Semántica 2", showgrid=True),
-            xaxis2=dict(title="Año de Publicación", dtick=1, showgrid=True),
-            yaxis2=dict(title="Volumen de Publicaciones (N)", showgrid=True),
-            legend=dict(
-                title=dict(text="<b>Taxonomías y Estado de Madurez</b>"),
-                x=1.02,
-                y=1,
-                bgcolor="rgba(255,255,255,0.85)",
-                bordercolor="#E0E0E0",
-                borderwidth=1
+            xaxis=dict(title="Dimensión Semántica 1 (t-SNE)", showgrid=True, gridcolor="#F1F5F9", zeroline=False),
+            yaxis=dict(title="Dimensión Semántica 2 (t-SNE)", showgrid=True, gridcolor="#F1F5F9", zeroline=False),
+            xaxis2=dict(
+                title="Año de Publicación",
+                dtick=1,
+                range=[min_year - 0.5, max_year + 0.5],
+                showgrid=True,
+                gridcolor="#F1F5F9"
             ),
-            margin=dict(l=50, r=280, t=110, b=50),
-            width=1550,
-            height=780,
-            template="plotly_white"
+            yaxis2=dict(title="Volumen de Publicaciones (N)", showgrid=True, gridcolor="#F1F5F9"),
+            legend=dict(
+                title=dict(text="<b>Taxonomías y Estado de Madurez</b>", font=dict(size=12, color="#0F172A")),
+                orientation="h",
+                y=-0.16,
+                x=0.5,
+                xanchor="center",
+                bgcolor="rgba(255,255,255,0.95)",
+                bordercolor="#CBD5E1",
+                borderwidth=1,
+                font=dict(size=11, color="#334155")
+            ),
+            margin=dict(l=60, r=50, t=130, b=120)
         )
 
         out_html = os.path.join(self.output_dir, "mapa_interactivo.html")
-        fig.write_html(out_html)
+        fig.write_html(out_html, config={"responsive": True, "displayModeBar": True})
         print(f"✔ Dashboard Dual interactivo generado en: {out_html}")
         return out_html
 

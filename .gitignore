@@ -29,7 +29,9 @@ Thumbs.db
 
 # Project outputs & temporary execution caches
 output/
-output_test/
+output_*/
+!output_test/
+!output_test/**
 *.npy
 *.csv.cache
 *.log
