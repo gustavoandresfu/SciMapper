@@ -32,8 +32,8 @@ class AutoVisualizer:
             rows=1, cols=2,
             column_widths=[0.58, 0.34],
             subplot_titles=[
-                "<b>Mapa Semántico 2D y Densidad de Investigación (t-SNE + KDE)</b>",
-                "<b>Dinámica y Trayectoria Temporal Anual</b>"
+                "<b>Mapa Semántico 2D (t-SNE + KDE)</b>",
+                "<b>Dinámica Temporal Anual</b>"
             ],
             horizontal_spacing=0.08
         )
@@ -216,6 +216,11 @@ class AutoVisualizer:
             xanchor="left",
             yanchor="bottom",
             font=dict(size=17, color="#0F172A", family="Segoe UI, Inter, Arial, sans-serif"),
+        )
+
+        fig.update_annotations(
+            font=dict(size=11, color="#334155"),
+            selector=lambda a: ("Mapa Sem" in (a.text or "")) or ("Dinámica Temporal" in (a.text or "")),
         )
 
         fig.update_layout(
