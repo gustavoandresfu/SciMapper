@@ -11,7 +11,17 @@ if base not in sys.path:
 if exe_dir not in sys.path:
     sys.path.insert(0, exe_dir)
 
-os.chdir(base)
+# Keep generated files (config/output) next to the executable, not in _internal
+os.chdir(exe_dir)
+
+# Streamlit is more reliable when the entrypoint lives in the working directory
+src_app = os.path.join(base, "streamlit_app.py")
+dst_app = os.path.join(exe_dir, "streamlit_app.py")
+if os.path.exists(src_app) and not os.path.exists(dst_app):
+    try:
+        shutil.copy2(src_app, dst_app)
+    except OSError:
+        pass
 
 cli_flags = {"--wizard", "--init", "--run-discovery", "--compile", "--build-doc", "--all", "--recommend-papers", "--version", "--web"}
 run_cli = any(flag in sys.argv for flag in cli_flags) or len(sys.argv) == 1
@@ -21,9 +31,12 @@ if run_cli and "--web" not in sys.argv and len(sys.argv) == 1:
     sys.argv = [sys.argv[0], "--wizard"]
 
 if "--web" in sys.argv:
-    from streamlit.web import bootstrap
-    app_path = os.path.join(base, "streamlit_app.py")
-    bootstrap.run(app_path, "", [], {})
+    print("=" * 70)
+    print("La app web no esta disponible en la version portable.")
+    print("Para usar la interfaz web, instala Python y ejecuta:")
+    print("  python main.py --web")
+    print("=" * 70)
+    sys.exit(0)
 else:
     import main
     main.main()
