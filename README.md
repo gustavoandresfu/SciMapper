@@ -59,7 +59,15 @@ graph TD
 
 ### 1. Installation
 
-Clone the repository and install the dependencies:
+Install from PyPI (recommended):
+
+```bash
+pip install scimapper
+# Upgrade to the latest version
+pip install --upgrade scimapper
+```
+
+Or clone the repository and install from source:
 
 ```bash
 git clone https://github.com/gustavoandresfu/SciMapper.git
@@ -68,6 +76,7 @@ pip install -r requirements.txt
 ```
 
 *(Optional)* Install as an editable command-line utility:
+
 ```bash
 pip install -e .
 ```
