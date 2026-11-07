@@ -351,7 +351,10 @@ def cmd_web():
     print("👉 Se abrirá en el navegador (por defecto http://localhost:8501)")
     print("   Presiona Ctrl+C para detener el servidor.\n")
     try:
-        subprocess.run([sys.executable, "-m", "streamlit", "run", app_path], check=False)
+        subprocess.run(
+            [sys.executable, "-m", "streamlit", "run", app_path, "--server.fileWatcherType", "none"],
+            check=False,
+        )
     except KeyboardInterrupt:
         print("\n🛑 Servidor detenido.")
 
