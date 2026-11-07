@@ -27,10 +27,21 @@ class AutoClusterer:
         self.k = self.nlp_cfg.get("n_clusters", 6)
 
     def reduce_2d(self, embeddings: np.ndarray) -> np.ndarray:
-        logger.info("Reduciendo dimensionalidad a espacio bidimensional (PCA + t-SNE)...")
         n_samples = embeddings.shape[0]
         if n_samples <= 2:
             return np.zeros((n_samples, 2))
+
+        method = str(self.nlp_cfg.get("dimensionality_reduction", "pca_tsne")).lower()
+        if method == "pca" or n_samples < 8:
+            logger.info("Reduciendo dimensionalidad con PCA (modo ligero)...")
+            n_components = min(2, embeddings.shape[1], max(1, n_samples - 1))
+            pca = PCA(n_components=n_components, random_state=42)
+            coords = pca.fit_transform(embeddings)
+            if coords.shape[1] == 1:
+                coords = np.column_stack([coords, np.zeros(n_samples)])
+            return coords
+
+        logger.info("Reduciendo dimensionalidad a espacio bidimensional (PCA + t-SNE)...")
 
         pca_dims = min(50, embeddings.shape[1], n_samples - 1)
         pca = PCA(n_components=pca_dims, random_state=42)

@@ -196,6 +196,13 @@ def main():
         nlp["n_clusters"] = st.slider(t("clusters"), 2, 12, int(nlp.get("n_clusters", 6)))
         sw = nlp.get("stop_words", "english")
         nlp["stop_words"] = st.selectbox(t("stopwords"), ["english", "none"], index=0 if sw == "english" else 1)
+        red = nlp.get("dimensionality_reduction", "pca_tsne")
+        nlp["dimensionality_reduction"] = st.selectbox(
+            "Reducción de dimensionalidad" if st.session_state["language"] == "Español" else "Dimensionality reduction",
+            ["pca_tsne", "pca"],
+            index=0 if red == "pca_tsne" else 1,
+            help="Usa 'pca' (modo ligero) en Hugging Face gratuito." if st.session_state["language"] == "Español" else "Use 'pca' (light mode) on free Hugging Face Spaces.",
+        )
 
     elif step == 4:
         st.subheader(t("synth"))
