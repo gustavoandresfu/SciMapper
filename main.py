@@ -19,6 +19,7 @@ import json
 import shutil
 import argparse
 import logging
+import subprocess
 import pandas as pd
 import numpy as np
 
@@ -328,6 +329,32 @@ def cmd_build_doc(config: dict):
     print("   Matriz de Discusión con papers seleccionados y secciones preparadas.")
     print("=" * 70)
 
+def cmd_web():
+    print("=" * 70)
+    print("🌐 INICIANDO APP WEB (Streamlit)")
+    print("=" * 70)
+
+    app_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "streamlit_app.py")
+    if not os.path.exists(app_path):
+        print("❌ No se encontró 'streamlit_app.py'.")
+        print("💡 Ejecuta desde el repositorio o reinstala el paquete.")
+        sys.exit(1)
+
+    try:
+        import streamlit  # noqa: F401
+    except Exception:
+        print("❌ Streamlit no está instalado.")
+        print("💡 Instálalo con: pip install streamlit  (o pip install 'scimapper[web]')")
+        sys.exit(1)
+
+    print(f"📄 App: {app_path}")
+    print("👉 Se abrirá en el navegador (por defecto http://localhost:8501)")
+    print("   Presiona Ctrl+C para detener el servidor.\n")
+    try:
+        subprocess.run([sys.executable, "-m", "streamlit", "run", app_path], check=False)
+    except KeyboardInterrupt:
+        print("\n🛑 Servidor detenido.")
+
 def main():
     parser = argparse.ArgumentParser(
         description="SciMapper: Automated Scientific Mapping & Systematic Literature Reviews with Dense Semantic Clustering.",
@@ -343,9 +370,14 @@ def main():
     parser.add_argument("--all", action="store_true", help="Ejecuta todo el pipeline de punta a punta (Discovery + Compile + Build Doc).")
     parser.add_argument("--version", action="version", version=f"SciMapper {__version__}")
     parser.add_argument("--verbose", action="store_true", help="Activa salida detallada (logging DEBUG).")
+    parser.add_argument("--web", action="store_true", help="Inicia la app web (Streamlit) para usar el pipeline desde el navegador.")
 
     args = parser.parse_args()
     setup_logging(verbose=getattr(args, "verbose", False))
+
+    if args.web:
+        cmd_web()
+        return
 
     if args.init:
         cmd_init(args.config, quick=args.quick)

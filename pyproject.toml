@@ -64,6 +64,7 @@ scimapper = "main:main"
 
 [tool.setuptools.package-data]
 "core" = ["config_template.json"]
+"*" = ["streamlit_app.py"]
 
 [tool.setuptools.packages.find]
 include = ["core*"]
