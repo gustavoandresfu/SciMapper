@@ -30,7 +30,7 @@ class AutoVisualizer:
         # Crear figura con 2 subplots en paralelo: Mapa 2D (58%) y Líneas Temporales (42%)
         fig = make_subplots(
             rows=1, cols=2,
-            column_widths=[0.58, 0.42],
+            column_widths=[0.58, 0.34],
             subplot_titles=[
                 "<b>Mapa Semántico 2D y Densidad de Investigación (t-SNE + KDE)</b>",
                 "<b>Dinámica y Trayectoria Temporal Anual</b>"
@@ -206,6 +206,18 @@ class AutoVisualizer:
         for l_idx in range(len(fig.data) - len(unique_topics), len(fig.data)):
             vis_points[l_idx] = True
 
+        fig.add_annotation(
+            x=0.02,
+            y=1.30,
+            xref="paper",
+            yref="paper",
+            text=f"<b>{self.title}</b><br><span style='font-size:13px; color:#64748B; font-weight:normal;'>Mapeo Semántico 2D (t-SNE) + Densidad Topográfica (KDE) + Radar de Dinámica Temporal | {len(df)} Artículos Indexados</span>",
+            showarrow=False,
+            xanchor="left",
+            yanchor="bottom",
+            font=dict(size=17, color="#0F172A", family="Segoe UI, Inter, Arial, sans-serif"),
+        )
+
         fig.update_layout(
             autosize=True,
             height=860,
@@ -214,9 +226,9 @@ class AutoVisualizer:
                 dict(
                     type="buttons",
                     direction="right",
-                    x=1.0,
+                    x=0.99,
                     xanchor="right",
-                    y=1.14,
+                    y=1.18,
                     showactive=True,
                     bgcolor="#F8FAFC",
                     bordercolor="#CBD5E1",
@@ -228,13 +240,7 @@ class AutoVisualizer:
                     ]
                 )
             ],
-            title={
-                'text': f"<b>{self.title}</b><br><span style='font-size:13px; color:#64748B; font-weight:normal;'>Mapeo Semántico 2D (t-SNE) + Densidad Topográfica (KDE) + Radar de Dinámica Temporal | {len(df)} Artículos Indexados</span>",
-                'x': 0.01,
-                'xanchor': 'left',
-                'y': 0.98,
-                'font': dict(size=17, color="#0F172A", family="Segoe UI, Inter, Arial, sans-serif")
-            },
+            title={'text': ''},
             xaxis=dict(title="Dimensión Semántica 1 (t-SNE)", showgrid=True, gridcolor="#F1F5F9", zeroline=False),
             yaxis=dict(title="Dimensión Semántica 2 (t-SNE)", showgrid=True, gridcolor="#F1F5F9", zeroline=False),
             xaxis2=dict(
@@ -256,7 +262,7 @@ class AutoVisualizer:
                 borderwidth=1,
                 font=dict(size=11, color="#334155")
             ),
-            margin=dict(l=60, r=50, t=130, b=120)
+            margin=dict(l=60, r=50, t=210, b=140)
         )
 
         out_html = os.path.join(self.output_dir, "mapa_interactivo.html")
