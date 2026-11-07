@@ -14,15 +14,6 @@ if exe_dir not in sys.path:
 # Keep generated files (config/output) next to the executable, not in _internal
 os.chdir(exe_dir)
 
-# Streamlit is more reliable when the entrypoint lives in the working directory
-src_app = os.path.join(base, "streamlit_app.py")
-dst_app = os.path.join(exe_dir, "streamlit_app.py")
-if os.path.exists(src_app) and not os.path.exists(dst_app):
-    try:
-        shutil.copy2(src_app, dst_app)
-    except OSError:
-        pass
-
 cli_flags = {"--wizard", "--init", "--run-discovery", "--compile", "--build-doc", "--all", "--recommend-papers", "--version", "--web"}
 run_cli = any(flag in sys.argv for flag in cli_flags) or len(sys.argv) == 1
 
