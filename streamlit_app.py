@@ -32,7 +32,7 @@ I18N = {
     "English": {
         "title": "SciMapper - Configuration Wizard",
         "upload": "Optional: load an existing config JSON",
-        "step": "Step {}/6",
+        "step": "Step {step}/6",
         "meta": "1) Project metadata",
         "title_field": "Study title",
         "short_name": "Short name (no spaces)",
@@ -68,7 +68,7 @@ I18N = {
     "Español": {
         "title": "SciMapper - Asistente de Configuración",
         "upload": "Opcional: cargar config JSON existente",
-        "step": "Paso {}/6",
+        "step": "Paso {step}/6",
         "meta": "1) Metadatos del proyecto",
         "title_field": "Título del estudio",
         "short_name": "Nombre corto (sin espacios)",
