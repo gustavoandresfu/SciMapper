@@ -56,7 +56,7 @@ def load_config(config_path: str) -> dict:
     return cfg
 
 def cmd_init(target_path: str = "sms_config.json", quick: bool = False):
-    template_path = os.path.join(os.path.dirname(__file__), "config_template.json")
+    template_path = os.path.join(os.path.dirname(__file__), "core", "config_template.json")
     if os.path.exists(target_path):
         print(f"⚠️ El archivo '{target_path}' ya existe.")
         try:

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scimapper"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
   { name="Gustavo Andrés Futo", email="gustavoandresfu@gmail.com" },
 ]
@@ -63,7 +63,7 @@ dependencies = [
 scimapper = "main:main"
 
 [tool.setuptools.package-data]
-"" = ["config_template.json"]
+"core" = ["config_template.json"]
 
 [tool.setuptools.packages.find]
 include = ["core*"]

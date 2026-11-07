@@ -1,0 +1,48 @@
+{
+  "project_metadata": {
+    "title": "Mapeo Sistemático de la Literatura sobre [Tu Tema Aquí]",
+    "short_name": "SMS_Proyecto",
+    "authors": ["Tu Nombre", "Coautor 1"],
+    "temporal_window": [2018, 2026],
+    "output_dir": "./output"
+  },
+
+  "research_questions": {
+    "RQ1": "¿Qué enfoques y técnicas principales se aplican actualmente en la disciplina?",
+    "RQ2": "¿Qué métricas y metodologías empíricas de evaluación se reportan en la literatura?",
+    "RQ3": "¿Cuáles son los principales desafíos abiertos, limitaciones y vacíos de investigación?"
+  },
+
+  "search_strategy": {
+    "openalex_email": "tu_email@ejemplo.com",
+    "max_results_per_query": 150,
+    "queries": [
+      "\"primary topic\" AND (\"secondary keyword\" OR \"alternative keyword\")",
+      "\"methodology keyword\" AND \"domain keyword\""
+    ]
+  },
+
+  "nlp_tuning": {
+    "domain_preset": "software_engineering",
+    "domain_presets_catalog": {
+      "software_engineering": "sentence-transformers/all-MiniLM-L6-v2",
+      "computer_science_general": "BAAI/bge-small-en-v1.5",
+      "biomedical_health": "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract",
+      "scientific_general": "allenai/scibert_scivocab_uncased",
+      "finance_business": "ProsusAI/finbert",
+      "multilingual": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    },
+    "n_clusters": 6,
+    "dimensionality_reduction": "pca_tsne"
+  },
+
+  "qualitative_synthesis": {
+    "candidates_per_topic": 3,
+    "min_citations": 1
+  },
+
+  "prisma_audit": {
+    "deduplication_keys": ["doi", "title_hash"],
+    "quality_threshold": 3.5
+  }
+}
