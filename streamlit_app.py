@@ -9,9 +9,11 @@ try:
 except Exception as exc:  # pragma: no cover
     raise SystemExit("Streamlit is not installed. Install with: pip install 'scimapper[web]'") from exc
 
+import io
 import json
 import os
 import sys
+import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -229,6 +231,30 @@ def main():
                 with st.spinner("Building document..." if st.session_state["language"] == "English" else "Generando documento..."):
                     cmd_build_doc(cfg)
                 st.success("Document generated." if st.session_state["language"] == "English" else "Documento generado.")
+
+        out_dir = os.path.abspath(cfg.get("project_metadata", {}).get("output_dir", "./output"))
+        st.subheader("Resultados generados" if st.session_state["language"] == "Español" else "Generated results")
+        if os.path.exists(out_dir):
+            files = sorted(os.listdir(out_dir))
+            st.write(files)
+            if st.button("Crear ZIP de resultados" if st.session_state["language"] == "Español" else "Create results ZIP"):
+                buf = io.BytesIO()
+                with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+                    for root, _, fs in os.walk(out_dir):
+                        for f in fs:
+                            full = os.path.join(root, f)
+                            arc = os.path.relpath(full, out_dir)
+                            z.write(full, arc)
+                buf.seek(0)
+                short = cfg.get("project_metadata", {}).get("short_name", "SciMapper")
+                st.download_button(
+                    "Descargar ZIP" if st.session_state["language"] == "Español" else "Download ZIP",
+                    data=buf.getvalue(),
+                    file_name=f"{short}_resultados.zip",
+                    mime="application/zip",
+                )
+        else:
+            st.info("Aún no hay carpeta de salida. Ejecuta el pipeline primero." if st.session_state["language"] == "Español" else "No output folder yet. Run the pipeline first.")
 
         st.download_button(
             t("download"),
