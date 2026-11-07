@@ -180,7 +180,7 @@ def main():
     elif step == 2:
         st.subheader(t("search"))
         strat["openalex_email"] = st.text_input(t("email"), strat.get("openalex_email", ""), help="Used for the OpenAlex polite pool.")
-        strat["max_results_per_query"] = st.slider(t("max_results"), 10, 300, int(strat.get("max_results_per_query", 100)))
+        strat["max_results_per_query"] = st.slider(t("max_results"), 10, 300, int(strat.get("max_results_per_query", 100)), help="En Hugging Face gratuito, usa 20-40 para evitar límites de CPU." if st.session_state["language"] == "Español" else "On free Hugging Face Spaces, use 20-40 to avoid CPU limits.")
         st.session_state["queries_text"] = st.text_area(t("queries"), st.session_state["queries_text"], height=180)
         strat["queries"] = [q.strip() for q in st.session_state["queries_text"].splitlines() if q.strip()]
 
@@ -189,7 +189,7 @@ def main():
         preset_keys = list(DOMAIN_PRESETS.keys())
         current = nlp.get("domain_preset", "software_engineering")
         idx = preset_keys.index(current) if current in preset_keys else 0
-        preset = st.selectbox(t("preset"), preset_keys, index=idx)
+        preset = st.selectbox(t("preset"), preset_keys, index=idx, help="En Spaces gratuitos, 'software_engineering' (MiniLM) es el más ligero." if st.session_state["language"] == "Español" else "On free Spaces, 'software_engineering' (MiniLM) is the lightest.")
         nlp["domain_preset"] = preset
         nlp["domain_presets_catalog"] = DOMAIN_PRESETS
         nlp["embedding_model"] = DOMAIN_PRESETS[preset]
