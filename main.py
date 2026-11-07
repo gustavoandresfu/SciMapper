@@ -377,9 +377,51 @@ def cmd_wizard(config_path: str):
     print("🧙 ASISTENTE COMPLETO (Wizard) - SciMapper")
     print("=" * 70)
 
+    interactive = sys.stdin.isatty()
+
     if not os.path.exists(config_path):
         print("📝 No existe configuración. Se iniciará el asistente de inicialización.")
-        cmd_init(config_path, quick=not sys.stdin.isatty())
+        cmd_init(config_path, quick=not interactive)
+    else:
+        print(f"📄 Configuración encontrada: {config_path}")
+        output_dir = None
+        try:
+            _cfg = load_config(config_path)
+            output_dir = _cfg.get("project_metadata", {}).get("output_dir", "./output")
+        except Exception:
+            output_dir = "./output"
+
+        if interactive:
+            print("\n¿Qué deseas hacer?")
+            print("  1) Ejecutar todo (Discovery → Compile → Build doc)")
+            print("  2) Solo Compile (si ya hiciste Discovery)")
+            print("  3) Solo Build doc (si ya compilaste)")
+            print("  4) Reiniciar configuración (borrar y crear nueva)")
+            print("  0) Salir")
+            try:
+                choice = input("Elige una opción [1]: ").strip() or "1"
+            except (EOFError, KeyboardInterrupt):
+                choice = "1"
+        else:
+            choice = "1"
+
+        if choice == "0":
+            print("Operación cancelada.")
+            return
+        if choice == "4":
+            try:
+                os.remove(config_path)
+            except OSError:
+                pass
+            cmd_init(config_path, quick=not interactive)
+        elif choice in ("2", "3"):
+            config = load_config(config_path)
+            if choice == "2":
+                cmd_compile(config)
+            else:
+                cmd_build_doc(config)
+            print("\n🎉 Listo.")
+            return
 
     config = load_config(config_path)
 
