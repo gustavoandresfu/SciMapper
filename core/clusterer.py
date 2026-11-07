@@ -18,6 +18,61 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 logger = logging.getLogger("scimapper.clusterer")
 
+SPANISH_STOP_WORDS = [
+    "a", "al", "algo", "algunas", "algunos", "ante", "antes", "como", "con", "contra",
+    "cual", "cuando", "de", "del", "desde", "donde", "durante", "e", "el", "ella",
+    "ellas", "ellos", "en", "entre", "era", "erais", "eran", "eras", "eres", "es",
+    "esa", "esas", "ese", "esos", "esta", "estaba", "estabais", "estaban", "estabas",
+    "estad", "estada", "estadas", "estado", "estados", "estamos", "estando", "estar",
+    "estaremos", "estara", "estaran", "estaras", "estare", "estareis", "estaria",
+    "estariais", "estarian", "estarias", "estas", "este", "estemos", "esto", "estos",
+    "estoy", "estuve", "estuviera", "estuvierais", "estuvieran", "estuvieras",
+    "estuvieron", "estuviese", "estuvieseis", "estuviesen", "estuvieses", "estuvimos",
+    "estuviste", "estuvisteis", "estuviere", "estuviereis", "estuvieren", "estuvieres",
+    "estuvieron", "estuvo", "estoy", "fin", "fue", "fuera", "fuerais", "fueran",
+    "fueras", "fueron", "fuese", "fueseis", "fuesen", "fueses", "fui", "fuimos",
+    "fuiste", "fuisteis", "ha", "haber", "habia", "habiais", "habiamos", "habian",
+    "habias", "habida", "habidas", "habido", "habidos", "habiendo", "habra", "habran",
+    "habras", "habre", "habreis", "habria", "habriais", "habrian", "habrias", "han",
+    "has", "hasta", "hay", "haya", "hayais", "hayan", "hayas", "he", "hemos", "hube",
+    "hubiera", "hubierais", "hubieran", "hubieras", "hubieron", "hubiese", "hubieseis",
+    "hubiesen", "hubieses", "hubimos", "hubiste", "hubisteis", "hubiere", "hubiereis",
+    "hubieren", "hubieres", "hubieron", "hubo", "la", "las", "le", "les", "lo", "los",
+    "mas", "me", "mi", "mia", "mias", "mientras", "mio", "mios", "mis", "mucho",
+    "muchos", "muy", "nada", "ni", "no", "nos", "nosotras", "nosotros", "nuestra",
+    "nuestras", "nuestro", "nuestros", "o", "os", "otra", "otras", "otro", "otros",
+    "para", "pero", "poco", "por", "porque", "que", "quien", "quienes", "se", "sea",
+    "seais", "sean", "seas", "ser", "sera", "seran", "seras", "sere", "sereis",
+    "seria", "seriais", "serian", "serias", "ses", "sido", "siendo", "sin", "sobre",
+    "sois", "somos", "son", "soy", "su", "sus", "suya", "suyas", "suyo", "suyos",
+    "tambien", "tanto", "te", "teneis", "tenemos", "tener", "tenga", "tengais",
+    "tengan", "tengas", "tengo", "tenia", "teniais", "teniamos", "tenian", "tenias",
+    "tenida", "tenidas", "tenido", "tenidos", "teniendo", "tenra", "tenran", "tenras",
+    "tenre", "tenreis", "tenria", "tenriais", "tenrian", "tenrias", "ti", "tiene",
+    "tienen", "tienes", "todo", "todos", "tu", "tus", "tuve", "tuviera", "tuvierais",
+    "tuvieran", "tuvieras", "tuvieron", "tuviese", "tuvieseis", "tuviesen", "tuvieses",
+    "tuvimos", "tuviste", "tuvisteis", "tuviere", "tuviereis", "tuvieren", "tuvieres",
+    "tuvieron", "tuvo", "tuya", "tuyas", "tuyo", "tuyos", "un", "una", "unas", "uno",
+    "unos", "vosotras", "vosotros", "vuestra", "vuestras", "vuestro", "vuestros",
+    "y", "ya", "yo", "el", "la", "los", "las", "un", "una", "unos", "unas",
+]
+
+ENGLISH_STOP_WORDS = [
+    "a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
+    "any", "are", "as", "at", "be", "because", "been", "before", "being", "below",
+    "between", "both", "but", "by", "could", "did", "do", "does", "doing", "down",
+    "during", "each", "few", "for", "from", "further", "had", "has", "have", "having",
+    "he", "her", "here", "hers", "herself", "him", "himself", "his", "how", "i", "if",
+    "in", "into", "is", "it", "its", "itself", "just", "me", "more", "most", "my",
+    "myself", "no", "nor", "not", "now", "of", "off", "on", "once", "only", "or",
+    "other", "our", "ours", "ourselves", "out", "over", "own", "same", "she", "should",
+    "so", "some", "such", "than", "that", "the", "their", "theirs", "them",
+    "themselves", "then", "there", "these", "they", "this", "those", "through", "to",
+    "too", "under", "until", "up", "very", "was", "we", "were", "what", "when",
+    "where", "which", "while", "who", "whom", "why", "will", "with", "you", "your",
+    "yours", "yourself", "yourselves",
+]
+
 class AutoClusterer:
     def __init__(self, config: dict):
         self.config = config
@@ -70,9 +125,22 @@ class AutoClusterer:
             cluster_docs = [texts[i] for i in range(len(texts)) if labels[i] == l]
             docs_per_cluster.append(" ".join(cluster_docs))
 
-        stop_words = self.nlp_cfg.get("stop_words", "english")
-        if isinstance(stop_words, str) and stop_words.lower() in ("none", "null", ""):
-            stop_words = None
+        if "stop_words" not in self.nlp_cfg:
+            lang = self.config.get("project_metadata", {}).get("language", "en")
+            stop_words = "spanish" if lang == "es" else "english"
+        else:
+            stop_words = self.nlp_cfg.get("stop_words", "english")
+
+        if isinstance(stop_words, str):
+            sw = stop_words.lower()
+            if sw in ("none", "null", ""):
+                stop_words = None
+            elif sw == "spanish":
+                stop_words = SPANISH_STOP_WORDS
+            elif sw == "multilingual":
+                stop_words = ENGLISH_STOP_WORDS + SPANISH_STOP_WORDS
+            elif sw == "english":
+                stop_words = "english"
 
         vec = CountVectorizer(ngram_range=(1, 2), stop_words=stop_words, min_df=1, max_df=1.0)
         X = vec.fit_transform(docs_per_cluster)

@@ -196,7 +196,9 @@ def main():
         nlp["embedding_model"] = DOMAIN_PRESETS[preset]
         nlp["n_clusters"] = st.slider(t("clusters"), 2, 12, int(nlp.get("n_clusters", 6)))
         sw = nlp.get("stop_words", "english")
-        nlp["stop_words"] = st.selectbox(t("stopwords"), ["english", "none"], index=0 if sw == "english" else 1)
+        opts = ["english", "spanish", "multilingual", "none"]
+        idx = opts.index(sw) if sw in opts else 0
+        nlp["stop_words"] = st.selectbox(t("stopwords"), opts, index=idx)
         red = nlp.get("dimensionality_reduction", "pca_tsne")
         nlp["dimensionality_reduction"] = st.selectbox(
             "Reducción de dimensionalidad" if st.session_state["language"] == "Español" else "Dimensionality reduction",
