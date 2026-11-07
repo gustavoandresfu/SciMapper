@@ -26,6 +26,10 @@ class AutoSelector:
         print("\n🎯 SELECCIÓN ESTRATIFICADA DE ARTÍCULOS PARA LA DISCUSIÓN...")
         print(f"   Estrategia: Centralidad Semántica (60%) + Citas (40%) | Umbral preferente: >= {self.min_citations} citas")
 
+        df = df.reset_index(drop=True).copy()
+        if len(df) != len(embeddings):
+            raise ValueError(f"Desalineación df/embeddings: {len(df)} vs {len(embeddings)}")
+
         candidates_list = []
 
         # Asegurar tipos y columnas

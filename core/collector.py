@@ -9,9 +9,13 @@ import sys
 import json
 import time
 import re
+import logging
 import urllib.parse
 import urllib.request
+import urllib.error
 import pandas as pd
+
+logger = logging.getLogger("scimapper.collector")
 
 def clean_text(text: str) -> str:
     if not text:
@@ -43,7 +47,7 @@ class AutoCollector:
         self.output_dir = self.meta.get("output_dir", "./output")
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def fetch_from_openalex(self, query: str) -> list:
+    def fetch_from_openalex(self, query: str, max_retries: int = 3) -> list:
         results = []
         base_url = "https://api.openalex.org/works"
         params = {
@@ -53,60 +57,67 @@ class AutoCollector:
             "mailto": self.email
         }
         url = f"{base_url}?{urllib.parse.urlencode(params)}"
-        print(f"  🔍 Consultando: {query[:60]}...")
+        logger.info("Consultando: %s", query[:60])
 
         obtained = 0
         page = 1
         while obtained < self.max_per_query:
             page_url = f"{url}&page={page}"
-            try:
-                req = urllib.request.Request(page_url, headers={"User-Agent": f"AutoSMS-Framework ({self.email})"})
-                with urllib.request.urlopen(req, timeout=20) as resp:
-                    data = json.loads(resp.read().decode("utf-8"))
-
-                items = data.get("results", [])
-                if not items:
+            data = None
+            for attempt in range(1, max_retries + 1):
+                try:
+                    req = urllib.request.Request(page_url, headers={"User-Agent": f"AutoSMS-Framework ({self.email})"})
+                    with urllib.request.urlopen(req, timeout=30) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
                     break
-
-                for it in items:
-                    title = clean_text(it.get("title") or "")
-                    abstract = reconstruct_abstract(it.get("abstract_inverted_index"))
-                    if len(title) < 10 or len(abstract) < 80:
-                        continue
-
-                    authors_list = []
-                    for a in (it.get("authorships") or []):
-                        auth = a.get("author") or {}
-                        name = auth.get("display_name")
-                        if name:
-                            authors_list.append(name)
-                    authors = "; ".join(authors_list) or "Desconocido"
-
-                    loc = it.get("primary_location") or {}
-                    src = loc.get("source") or {}
-                    venue = src.get("display_name") or "No especificado"
-
-                    results.append({
-                        "id": it.get("id", ""),
-                        "doi": it.get("doi", "") or "",
-                        "title": title,
-                        "authors": authors,
-                        "publication_year": it.get("publication_year", ""),
-                        "venue": venue,
-                        "abstract": abstract,
-                        "cited_by_count": it.get("cited_by_count", 0)
-                    })
-                    obtained += 1
-                    if obtained >= self.max_per_query:
-                        break
-
-                page += 1
-                time.sleep(0.3)
-            except Exception as e:
-                print(f"    [!] Error en página {page}: {e}")
+                except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+                    wait = 2 ** attempt
+                    logger.warning("Error página %d (intento %d/%d): %s. Reintentando en %ds", page, attempt, max_retries, e, wait)
+                    time.sleep(wait)
+            if data is None:
+                logger.error("No se pudo obtener la página %d tras %d intentos. Abortando consulta.", page, max_retries)
                 break
 
-        print(f"    ✔ {len(results)} registros con abstract obtenidos.")
+            items = data.get("results", [])
+            if not items:
+                break
+
+            for it in items:
+                title = clean_text(it.get("title") or "")
+                abstract = reconstruct_abstract(it.get("abstract_inverted_index"))
+                if len(title) < 10 or len(abstract) < 80:
+                    continue
+
+                authors_list = []
+                for a in (it.get("authorships") or []):
+                    auth = a.get("author") or {}
+                    name = auth.get("display_name")
+                    if name:
+                        authors_list.append(name)
+                authors = "; ".join(authors_list) or "Desconocido"
+
+                loc = it.get("primary_location") or {}
+                src = loc.get("source") or {}
+                venue = src.get("display_name") or "No especificado"
+
+                results.append({
+                    "id": it.get("id", ""),
+                    "doi": it.get("doi", "") or "",
+                    "title": title,
+                    "authors": authors,
+                    "publication_year": it.get("publication_year", ""),
+                    "venue": venue,
+                    "abstract": abstract,
+                    "cited_by_count": it.get("cited_by_count", 0)
+                })
+                obtained += 1
+                if obtained >= self.max_per_query:
+                    break
+
+            page += 1
+            time.sleep(0.3)
+
+        logger.info("✔ %d registros con abstract obtenidos.", len(results))
         return results
 
     def run(self) -> pd.DataFrame:

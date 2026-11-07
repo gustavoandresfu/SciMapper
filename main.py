@@ -18,8 +18,11 @@ import sys
 import json
 import shutil
 import argparse
+import logging
 import pandas as pd
 import numpy as np
+
+__version__ = "1.0.1"
 
 # Soporte para salida unicode en consolas Windows
 if sys.platform == "win32":
@@ -35,6 +38,7 @@ from core.clusterer import AutoClusterer
 from core.visualizer import AutoVisualizer
 from core.selector import AutoSelector
 from core.doc_builder import AutoDocBuilder
+from core.utils import validate_config, setup_logging, write_manifest
 
 def load_config(config_path: str) -> dict:
     if not os.path.exists(config_path):
@@ -42,7 +46,14 @@ def load_config(config_path: str) -> dict:
         print("💡 Ejecuta 'python main.py --init' para generar una plantilla base.")
         sys.exit(1)
     with open(config_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        cfg = json.load(f)
+    errors = validate_config(cfg)
+    if errors:
+        print("❌ Configuración inválida:")
+        for e in errors:
+            print(f"   - {e}")
+        sys.exit(1)
+    return cfg
 
 def cmd_init(target_path: str = "sms_config.json", quick: bool = False):
     template_path = os.path.join(os.path.dirname(__file__), "config_template.json")
@@ -209,6 +220,8 @@ def cmd_run_discovery(config: dict, config_path: str):
     selector = AutoSelector(config)
     selector.select_candidates(df_clustered, embeddings, topics_summary)
 
+    write_manifest(output_dir, config, {"corpus_final": len(df_clustered), "topics": len(topics_summary)})
+
     print("\n" + "=" * 70)
     print("🎯 FASE 1 COMPLETADA CON ÉXITO")
     print("=" * 70)
@@ -328,8 +341,11 @@ def main():
     parser.add_argument("--compile", action="store_true", help="Fase 2: Aplica ajustes humanos y genera mapas interactivos y reportes finales.")
     parser.add_argument("--build-doc", action="store_true", help="Fase 3: Construye el borrador formal de paper en Microsoft Word (.docx).")
     parser.add_argument("--all", action="store_true", help="Ejecuta todo el pipeline de punta a punta (Discovery + Compile + Build Doc).")
+    parser.add_argument("--version", action="version", version=f"SciMapper {__version__}")
+    parser.add_argument("--verbose", action="store_true", help="Activa salida detallada (logging DEBUG).")
 
     args = parser.parse_args()
+    setup_logging(verbose=getattr(args, "verbose", False))
 
     if args.init:
         cmd_init(args.config, quick=args.quick)

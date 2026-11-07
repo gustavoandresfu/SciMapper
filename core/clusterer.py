@@ -8,6 +8,7 @@ del Radar de Madurez Temporal (CAGR y clasificación de tendencias).
 
 import os
 import json
+import logging
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
@@ -15,15 +16,18 @@ from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import CountVectorizer
 
+logger = logging.getLogger("scimapper.clusterer")
+
 class AutoClusterer:
     def __init__(self, config: dict):
         self.config = config
         self.nlp_cfg = config.get("nlp_tuning", {})
         self.output_dir = config.get("project_metadata", {}).get("output_dir", "./output")
+        os.makedirs(self.output_dir, exist_ok=True)
         self.k = self.nlp_cfg.get("n_clusters", 6)
 
     def reduce_2d(self, embeddings: np.ndarray) -> np.ndarray:
-        print("\n🌐 Reduciendo dimensionalidad a espacio bidimensional (PCA + t-SNE)...")
+        logger.info("Reduciendo dimensionalidad a espacio bidimensional (PCA + t-SNE)...")
         n_samples = embeddings.shape[0]
         if n_samples <= 2:
             return np.zeros((n_samples, 2))
@@ -40,7 +44,7 @@ class AutoClusterer:
     def cluster(self, embeddings: np.ndarray) -> np.ndarray:
         n_samples = embeddings.shape[0]
         actual_k = min(self.k, max(1, n_samples // 2))
-        print(f"🔬 Ejecutando agrupamiento no supervisado en k={actual_k} clusters...")
+        logger.info("Ejecutando agrupamiento no supervisado en k=%d clusters...", actual_k)
         if actual_k <= 1:
             return np.zeros(n_samples, dtype=int)
         kmeans = KMeans(n_clusters=actual_k, random_state=42, n_init=10)
@@ -48,24 +52,29 @@ class AutoClusterer:
         return labels
 
     def extract_c_tf_idf(self, texts: list, labels: np.ndarray, top_n: int = 8) -> dict:
-        print("🏷️ Calculando Class-based TF-IDF (c-TF-IDF) para extracción léxica...")
+        logger.info("Calculando Class-based TF-IDF (c-TF-IDF) para extraccion lexica...")
         unique_labels = sorted(list(set(labels)))
         docs_per_cluster = []
         for l in unique_labels:
             cluster_docs = [texts[i] for i in range(len(texts)) if labels[i] == l]
             docs_per_cluster.append(" ".join(cluster_docs))
 
-        vec = CountVectorizer(ngram_range=(1, 2), stop_words="english", min_df=1, max_df=1.0)
+        stop_words = self.nlp_cfg.get("stop_words", "english")
+        if isinstance(stop_words, str) and stop_words.lower() in ("none", "null", ""):
+            stop_words = None
+
+        vec = CountVectorizer(ngram_range=(1, 2), stop_words=stop_words, min_df=1, max_df=1.0)
         X = vec.fit_transform(docs_per_cluster)
         words = vec.get_feature_names_out()
 
-        tf = X.toarray()
+        tf = X.toarray().astype(float)
         w_sum = tf.sum(axis=1, keepdims=True)
         tf_norm = tf / np.maximum(w_sum, 1)
 
-        global_tf = tf.sum(axis=0)
-        total_words = tf.sum()
-        idf = np.log(1 + (total_words / (global_tf + 1)))
+        # IDF clásico por documento (cluster): log(1 + N / (df + 1))
+        doc_freq = (tf > 0).sum(axis=0).astype(float)
+        n_clusters = max(1, len(docs_per_cluster))
+        idf = np.log(1.0 + (n_clusters / (doc_freq + 1.0)))
         c_tf_idf = tf_norm * idf
 
         keywords_dict = {}
@@ -77,7 +86,7 @@ class AutoClusterer:
         return keywords_dict
 
     def compute_temporal_dynamics(self, df: pd.DataFrame, labels: np.ndarray) -> dict:
-        print("📈 Calculando Radar de Madurez Temporal y CAGR por Tópico...")
+        logger.info("Calculando Radar de Madurez Temporal y CAGR por Topico...")
         dynamics = {}
         unique_labels = sorted(list(set(labels)))
 
@@ -132,6 +141,7 @@ class AutoClusterer:
         return dynamics
 
     def run(self, df: pd.DataFrame, embeddings: np.ndarray) -> tuple:
+        df = df.reset_index(drop=True).copy()
         coords = self.reduce_2d(embeddings)
         df["coord_x"] = coords[:, 0]
         df["coord_y"] = coords[:, 1]
@@ -164,5 +174,5 @@ class AutoClusterer:
         with open(topics_json_path, "w", encoding="utf-8") as f:
             json.dump(topics_summary, f, indent=2, ensure_ascii=False)
 
-        print(f"\n✔ Archivo de ajuste humano generado en: {topics_json_path}")
+        logger.info("Archivo de ajuste humano generado en: %s", topics_json_path)
         return df, topics_summary

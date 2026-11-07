@@ -30,7 +30,17 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Information Analysis",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Intended Audience :: Science/Research"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "ruff>=0.4.0",
+]
+web = [
+    "streamlit>=1.30.0",
 ]
 dependencies = [
     "requests>=2.28.0",
@@ -51,3 +61,9 @@ dependencies = [
 
 [project.scripts]
 scimapper = "main:main"
+
+[tool.setuptools.package-data]
+"" = ["config_template.json"]
+
+[tool.setuptools.packages.find]
+include = ["core*"]
