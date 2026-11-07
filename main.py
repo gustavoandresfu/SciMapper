@@ -138,6 +138,17 @@ def cmd_init(target_path: str = "sms_config.json", quick: bool = False):
             break
         print("   ⚠️ Ingresa un número entre 3 y 10.")
 
+    # 3b. Ventana temporal
+    years_default = cfg.get("project_metadata", {}).get("temporal_window", [2018, 2026])
+    print("\n3b. Ventana temporal de búsqueda:")
+    while True:
+        y0 = prompt("   • Año inicial", str(years_default[0]))
+        y1 = prompt("   • Año final", str(years_default[1]))
+        if y0.isdigit() and y1.isdigit() and int(y0) <= int(y1):
+            cfg["project_metadata"]["temporal_window"] = [int(y0), int(y1)]
+            break
+        print("   ⚠️ Ingresa años válidos (inicial <= final).")
+
     # 4. Estrategia de búsqueda iterativa con guía de buenas prácticas
     print("\n7. Estrategia de Búsqueda Académica (OpenAlex):")
     print("   💡 Buenas prácticas metodológicas:")
