@@ -177,6 +177,17 @@ def cmd_init(target_path: str = "sms_config.json", quick: bool = False):
     if user_queries:
         cfg["search_strategy"]["queries"] = user_queries
 
+    # Preguntas de investigación (opcionales, con valores por defecto)
+    print("\n8. Preguntas de Investigación (RQs) para el manuscrito:")
+    print("   (Presiona [Enter] para aceptar el valor por defecto)\n")
+    rqs = cfg.get("research_questions", {})
+    new_rqs = {}
+    for rq_id in ["RQ1", "RQ2", "RQ3"]:
+        default_rq = rqs.get(rq_id, "")
+        val = prompt(f"   • {rq_id}", default_rq)
+        new_rqs[rq_id] = val if val else default_rq
+    cfg["research_questions"] = new_rqs
+
     with open(target_path, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=2, ensure_ascii=False)
 
