@@ -4,7 +4,7 @@
 ### Automated Scientific Mapping & Systematic Literature Reviews with Dense Semantic Clustering
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![PRISMA 2020](https://img.shields.io/badge/PRISMA-2020%20Compliant-green.svg)](https://www.prisma-statement.org/)
 [![OpenAlex API](https://img.shields.io/badge/Data%20Source-OpenAlex%20API-orange.svg)](https://openalex.org/)
 [![NLP Engine](https://img.shields.io/badge/NLP-Sentence--Transformers-purple.svg)](https://www.sbert.net/)
@@ -212,5 +212,5 @@ If you use **SciMapper** in your research, academic reviews, or dissertations, p
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.  
+This project is licensed under the **GNU General Public License v3.0 (GPLv3)** — see the [LICENSE](LICENSE) file for details.  
 Author: **Gustavo Andrés Futo** (2026).

@@ -22,7 +22,7 @@ import logging
 import pandas as pd
 import numpy as np
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 # Soporte para salida unicode en consolas Windows
 if sys.platform == "win32":
