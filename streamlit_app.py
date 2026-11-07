@@ -152,7 +152,7 @@ def main():
     nlp = cfg.setdefault("nlp_tuning", {})
     synth = cfg.setdefault("qualitative_synthesis", {})
 
-    st.progress((step + 1) / 6, text=t("step", step + 1))
+    st.progress((step + 1) / 6, text=t("step", step=step + 1))
 
     if step == 0:
         st.subheader(t("meta"))
