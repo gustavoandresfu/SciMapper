@@ -149,6 +149,7 @@ def main():
     step = st.session_state["step"]
     cfg = st.session_state["cfg"]
     meta = cfg.setdefault("project_metadata", {})
+    meta["language"] = "en" if st.session_state["language"] == "English" else "es"
     rqs = cfg.setdefault("research_questions", {})
     strat = cfg.setdefault("search_strategy", {})
     nlp = cfg.setdefault("nlp_tuning", {})

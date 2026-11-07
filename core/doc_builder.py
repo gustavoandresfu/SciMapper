@@ -16,8 +16,125 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import nsdecls, qn
 
+TEXTS = {
+    "es": {
+        "abstract": "El presente estudio reporta un Mapeo Sistemático de la Literatura (SMS) conducido bajo las directrices PRISMA 2020. "
+                    "Se aplicó un pipeline computacional no supervisado basado en modelos de lenguaje denso (Sentence-Transformers) y "
+                    "extracción léxica diferencial (c-TF-IDF), acoplado con supervisión experta continua (Human-in-the-Loop) para categorizar "
+                    "el estado del arte, identificar vacíos de investigación y sintetizar evidencias empíricas.",
+        "intro": "La creciente proliferación de literatura científica en esta disciplina exige metodologías sistemáticas y reproducibles "
+                 "capaces de caracterizar el panorama bibliográfico sin sesgos de selección manual. "
+                 "Para guiar esta investigación, se formularon las siguientes Preguntas de Investigación (RQs):",
+        "method": "El proceso de selección bibliográfica siguió el estándar internacional PRISMA 2020 (Preferred Reporting Items for Systematic "
+                  "Reviews and Meta-Analyses), combinando recolección automatizada de metadatos, deduplicación algorítmica y filtrado temático experto.",
+        "results": "El agrupamiento vectorial no supervisado acoplado a c-TF-IDF y el análisis de trayectorias temporales "
+                   "permitieron caracterizar la estructura temática del corpus y su tasa de crecimiento anual compuesta (CAGR).",
+        "results_note": "Como se observa en la tabla precedente, los tópicos catalogados como 'Emergentes' (🚀) exhiben una marcada aceleración "
+                        "en su volumen de publicaciones en los últimos 3 años (CAGR > 12%), reflejando las líneas de frontera investigativa. "
+                        "Por su parte, los tópicos 'Maduros' (⚖️) representan los fundamentos metodológicos consolidados de la disciplina.",
+        "discussion": "Para complementar la visión macroscópica del mapeo, se realizó un análisis cualitativo a texto completo "
+                      "sobre una muestra intencional estratificada de artículos representativos (medoides y publicaciones de alto impacto). "
+                      "Esta síntesis responde a las metodologías empíricas y vacíos planteados en las RQs.",
+        "threats": {
+            "construction": "Sesgo de cobertura en fuentes bibliográficas y sensibilidad de las consultas de búsqueda.",
+            "internal": "Posibles sesgos en la interpretación humana durante el nombramiento de clusters y selección de papers para la discusión profunda.",
+            "external": "Generalizabilidad de los patrones taxonómicos a entornos industriales no documentados formalmente en la literatura indexada.",
+        },
+        "conclusions": "El mapeo sistemático ha permitido sintetizar de manera estructurada y auditable el estado del arte en el dominio. "
+                       "La integración de modelos de lenguaje densos con supervisión humana experta ofreció un balance óptimo entre "
+                       "exhaustividad de cobertura y precisión interpretativa, identificando oportunidades prometedoras para futuras investigaciones.",
+        "headings": {
+            "intro": "I. INTRODUCCIÓN",
+            "method": "II. METODOLOGÍA Y PROTOCOLO PRISMA",
+            "results": "III. RESULTADOS: TAXONOMÍA Y DINÁMICA TEMPORAL",
+            "discussion": "IV. DISCUSIÓN Y SÍNTESIS CUALITATIVA",
+            "threats": "V. AMENAZAS A LA VALIDEZ",
+            "conclusions": "VI. CONCLUSIONES Y TRABAJO FUTURO",
+            "matrix": "Matriz de Artículos Analizados a Texto Completo",
+        },
+        "prisma_headers": ["Fase PRISMA", "Descripción del Proceso", "Registros", "Criterio Aplicado"],
+        "prisma_rows": [
+            ("1. Identificación", "Búsqueda automatizada en fuentes académicas abiertas (OpenAlex)", "Consultas booleanas estructuradas"),
+            ("2. Deduplicación", "Fusión de registros redundantes mediante DOI y hashes alfanuméricos", "Normalización estricta de títulos y DOIs"),
+            ("3. Screening Temático", "Agrupamiento vectorial y evaluación humana de relevancia", "Criterios de inclusión/exclusión del protocolo"),
+            ("4. Inclusión Final", "Corpus consolidado analizado en el mapeo conceptual y discusión", "Aptos para síntesis cuantitativa y cualitativa"),
+        ],
+        "tax_headers": ["ID", "Taxonomía / Tópico Descubierto", "Artículos", "%", "Dinámica y CAGR", "Descriptores Léxicos (c-TF-IDF)"],
+        "sel_headers": ["Ref", "Artículo / Autores", "Año | Citas", "Tópico", "Técnica / Aporte Principal"],
+        "abstract_label": "Resumen— ",
+        "excluded": " [Excluido]",
+        "technique_placeholder": "[Completar técnica y aporte específico]",
+        "findings_label": "Hallazgos Empíricos y Limitaciones: ",
+        "abstract_prefix": "Síntesis del Abstract: ",
+        "findings_space": "[Espacio para el investigador]: Describir aquí los hallazgos empíricos clave de este estudio en relación con {rq}. "
+                          "Evaluar el rigor de su validación experimental y las limitaciones identificadas por los autores.",
+        "threats_labels": {
+            "construction": "• Validez de Construcción: ",
+            "internal": "• Validez Interna: ",
+            "external": "• Validez Externa: ",
+        },
+    },
+    "en": {
+        "abstract": "This study reports a Systematic Literature Review (SLR) conducted under PRISMA 2020 guidelines. "
+                    "An unsupervised computational pipeline based on dense language models (Sentence-Transformers) and "
+                    "differential lexical extraction (c-TF-IDF) was applied, coupled with continuous expert supervision (Human-in-the-Loop) "
+                    "to categorize the state of the art, identify research gaps, and synthesize empirical evidence.",
+        "intro": "The growing proliferation of scientific literature in this discipline demands systematic and reproducible methodologies "
+                 "capable of characterizing the bibliographic landscape without manual selection bias. "
+                 "To guide this research, the following Research Questions (RQs) were formulated:",
+        "method": "The bibliographic selection process followed the international PRISMA 2020 standard (Preferred Reporting Items for Systematic "
+                  "Reviews and Meta-Analyses), combining automated metadata harvesting, algorithmic deduplication, and expert thematic filtering.",
+        "results": "Unsupervised vector clustering coupled with c-TF-IDF and temporal trajectory analysis "
+                   "allowed characterization of the thematic structure of the corpus and its compound annual growth rate (CAGR).",
+        "results_note": "As shown in the preceding table, topics classified as 'Emerging' (🚀) exhibit a marked acceleration "
+                        "in publication volume over the last 3 years (CAGR > 12%), reflecting frontier research lines. "
+                        "Meanwhile, 'Mature' (⚖️) topics represent the consolidated methodological foundations of the discipline.",
+        "discussion": "To complement the macroscopic view of the mapping, a full-text qualitative analysis was conducted "
+                      "on a purposive stratified sample of representative articles (medoids and high-impact publications). "
+                      "This synthesis addresses the empirical methodologies and gaps raised in the RQs.",
+        "threats": {
+            "construction": "Coverage bias in bibliographic sources and sensitivity of search queries.",
+            "internal": "Potential biases in human interpretation during cluster naming and paper selection for deep discussion.",
+            "external": "Generalizability of taxonomic patterns to industrial environments not formally documented in indexed literature.",
+        },
+        "conclusions": "The systematic mapping enabled a structured and auditable synthesis of the state of the art in the domain. "
+                       "The integration of dense language models with expert human supervision offered an optimal balance between "
+                       "coverage exhaustiveness and interpretive accuracy, identifying promising opportunities for future research.",
+        "headings": {
+            "intro": "I. INTRODUCTION",
+            "method": "II. METHODOLOGY AND PRISMA PROTOCOL",
+            "results": "III. RESULTS: TAXONOMY AND TEMPORAL DYNAMICS",
+            "discussion": "IV. DISCUSSION AND QUALITATIVE SYNTHESIS",
+            "threats": "V. THREATS TO VALIDITY",
+            "conclusions": "VI. CONCLUSIONS AND FUTURE WORK",
+            "matrix": "Matrix of Articles Analyzed in Full Text",
+        },
+        "prisma_headers": ["PRISMA Phase", "Process Description", "Records", "Criterion Applied"],
+        "prisma_rows": [
+            ("1. Identification", "Automated search in open academic sources (OpenAlex)", "Structured boolean queries"),
+            ("2. Deduplication", "Merging redundant records via DOI and alphanumeric hashes", "Strict normalization of titles and DOIs"),
+            ("3. Thematic Screening", "Vector clustering and human relevance evaluation", "Inclusion/exclusion criteria of the protocol"),
+            ("4. Final Inclusion", "Consolidated corpus analyzed in conceptual mapping and discussion", "Suitable for quantitative and qualitative synthesis"),
+        ],
+        "tax_headers": ["ID", "Discovered Taxonomy / Topic", "Articles", "%", "Dynamics and CAGR", "Lexical Descriptors (c-TF-IDF)"],
+        "sel_headers": ["Ref", "Article / Authors", "Year | Citations", "Topic", "Technique / Main Contribution"],
+        "abstract_label": "Abstract— ",
+        "excluded": " [Excluded]",
+        "technique_placeholder": "[Complete technique and specific contribution]",
+        "findings_label": "Empirical Findings and Limitations: ",
+        "abstract_prefix": "Abstract Synthesis: ",
+        "findings_space": "[Space for the researcher]: Describe here the key empirical findings of this study in relation to {rq}. "
+                          "Evaluate the rigor of its experimental validation and the limitations identified by the authors.",
+        "threats_labels": {
+            "construction": "• Construct Validity: ",
+            "internal": "• Internal Validity: ",
+            "external": "• External Validity: ",
+        },
+    },
+}
+
+
 def set_cell_background(cell, color_hex: str):
-    """Asigna color de fondo a una celda de tabla."""
     tcPr = cell._tc.get_or_add_tcPr()
     for child in list(tcPr):
         if child.tag.endswith('shd'):
@@ -25,8 +142,8 @@ def set_cell_background(cell, color_hex: str):
     shading_elm = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{color_hex}"/>')
     tcPr.append(shading_elm)
 
+
 def set_cell_margins(cell, top=80, bottom=80, left=120, right=120):
-    """Establece márgenes internos (padding) de la celda en dxa."""
     tcPr = cell._tc.get_or_add_tcPr()
     for child in list(tcPr):
         if child.tag.endswith('tcMar'):
@@ -39,8 +156,8 @@ def set_cell_margins(cell, top=80, bottom=80, left=120, right=120):
         tcMar.append(node)
     tcPr.append(tcMar)
 
+
 def style_academic_table(table, col_widths=None):
-    """Aplica formato visual académico uniforme a cualquier tabla."""
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
 
@@ -68,15 +185,18 @@ def style_academic_table(table, col_widths=None):
                     else:
                         run.font.color.rgb = RGBColor(30, 30, 30)
 
+
 class AutoDocBuilder:
     def __init__(self, config: dict):
         self.config = config
         self.meta = config.get("project_metadata", {})
         self.rqs = config.get("research_questions", {})
         self.output_dir = self.meta.get("output_dir", "./output")
-        self.title = self.meta.get("title", "Mapeo Sistemático de la Literatura")
-        self.authors = ", ".join(self.meta.get("authors", ["Investigador Principal"]))
+        self.title = self.meta.get("title", "Systematic Literature Review")
+        self.authors = ", ".join(self.meta.get("authors", ["Principal Investigator"]))
         self.years = self.meta.get("temporal_window", [2018, 2026])
+        self.lang = self.meta.get("language", "es")
+        self.T = TEXTS.get(self.lang, TEXTS["es"])
 
     def add_p(self, doc, text="", bold_prefix="", italic=False, space_after=4, align=WD_ALIGN_PARAGRAPH.JUSTIFY):
         p = doc.add_paragraph()
@@ -127,7 +247,6 @@ class AutoDocBuilder:
         print("\n📄 GENERANDO BORRADOR FORMAL EN MICROSOFT WORD (.docx)...")
         doc = docx.Document()
 
-        # Configuración de márgenes estándar (2.5 cm)
         sections = doc.sections
         for s in sections:
             s.top_margin = Inches(1.0)
@@ -135,7 +254,6 @@ class AutoDocBuilder:
             s.left_margin = Inches(1.0)
             s.right_margin = Inches(1.0)
 
-        # 1. Título y Metadatos
         p_title = doc.add_paragraph()
         p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_title.paragraph_format.space_after = Pt(8)
@@ -147,36 +265,23 @@ class AutoDocBuilder:
         p_sub = doc.add_paragraph()
         p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_sub.paragraph_format.space_after = Pt(18)
-        r_sub = p_sub.add_run(f"{self.authors}\nVentana de Estudio: {self.years[0]} – {self.years[1]}")
+        r_sub = p_sub.add_run(f"{self.authors}\n{self.years[0]} – {self.years[1]}")
         r_sub.font.name = "Times New Roman"
         r_sub.font.size = Pt(10.5)
         r_sub.font.italic = True
 
-        # Resumen / Abstract
-        self.add_p(doc, 
-            f"El presente estudio reporta un Mapeo Sistemático de la Literatura (SMS) conducido bajo las directrices PRISMA 2020. "
-            f"Se aplicó un pipeline computacional no supervisado basado en modelos de lenguaje denso (Sentence-Transformers) y "
-            f"extracción léxica diferencial (c-TF-IDF), acoplado con supervisión experta continua (Human-in-the-Loop) para categorizar "
-            f"el estado del arte, identificar vacíos de investigación y sintetizar evidencias empíricas.",
-            bold_prefix="Resumen— ")
+        T = self.T
+        self.add_p(doc, T["abstract"], bold_prefix=T["abstract_label"])
 
-        # 2. SECCIÓN I: INTRODUCCIÓN
-        self.add_heading_1(doc, "I. INTRODUCCIÓN")
-        self.add_p(doc, 
-            "La creciente proliferación de literatura científica en esta disciplina exige metodologías sistemáticas y reproducibles "
-            "capaces de caracterizar el panorama bibliográfico sin sesgos de selección manual. "
-            "Para guiar esta investigación, se formularon las siguientes Preguntas de Investigación (RQs):")
+        self.add_heading_1(doc, T["headings"]["intro"])
+        self.add_p(doc, T["intro"])
 
         for rq_id, rq_desc in self.rqs.items():
             self.add_p(doc, rq_desc, bold_prefix=f"• {rq_id}: ")
 
-        # 3. SECCIÓN II: METODOLOGÍA Y FLUJO PRISMA 2020
-        self.add_heading_1(doc, "II. METODOLOGÍA Y PROTOCOLO PRISMA")
-        self.add_p(doc, 
-            "El proceso de selección bibliográfica siguió el estándar internacional PRISMA 2020 (Preferred Reporting Items for Systematic "
-            "Reviews and Meta-Analyses), combinando recolección automatizada de metadatos, deduplicación algorítmica y filtrado temático experto.")
+        self.add_heading_1(doc, T["headings"]["method"])
+        self.add_p(doc, T["method"])
 
-        # Cargar datos de tópicos y candidatos
         topics_json_path = os.path.join(self.output_dir, "discovered_topics.json")
         candidates_json_path = os.path.join(self.output_dir, "candidatos_discusion.json")
 
@@ -194,123 +299,91 @@ class AutoDocBuilder:
         total_excluded = sum(t.get("count", 0) for t in topics_info.values() if t.get("exclude_prisma", False))
         total_raw = total_mapped + total_excluded
 
-        # Tabla PRISMA
         t_prisma = doc.add_table(rows=5, cols=4)
-        t_prisma.rows[0].cells[0].paragraphs[0].text = "Fase PRISMA"
-        t_prisma.rows[0].cells[1].paragraphs[0].text = "Descripción del Proceso"
-        t_prisma.rows[0].cells[2].paragraphs[0].text = "Registros"
-        t_prisma.rows[0].cells[3].paragraphs[0].text = "Criterio Aplicado"
+        for c_idx, h in enumerate(T["prisma_headers"]):
+            t_prisma.rows[0].cells[c_idx].paragraphs[0].text = h
 
         datos_prisma = [
-            ("1. Identificación", "Búsqueda automatizada en fuentes académicas abiertas (OpenAlex)", f"N = {total_raw}", "Consultas booleanas estructuradas"),
-            ("2. Deduplicación", "Fusión de registros redundantes mediante DOI y hashes alfanuméricos", f"Filtrado", "Normalización estricta de títulos y DOIs"),
-            ("3. Screening Temático", "Agrupamiento vectorial y evaluación humana de relevancia", f"Excluidos: {total_excluded}", "Criterios de inclusión/exclusión del protocolo"),
-            ("4. Inclusión Final", "Corpus consolidado analizado en el mapeo conceptual y discusión", f"N = {total_mapped}", "Aptos para síntesis cuantitativa y cualitativa")
+            ("1. " + ("Identificación" if self.lang == "es" else "Identification"), T["prisma_rows"][0][1], f"N = {total_raw}", T["prisma_rows"][0][2]),
+            ("2. " + ("Deduplicación" if self.lang == "es" else "Deduplication"), T["prisma_rows"][1][1], "Filtrado" if self.lang == "es" else "Filtered", T["prisma_rows"][1][2]),
+            ("3. " + ("Screening Temático" if self.lang == "es" else "Thematic Screening"), T["prisma_rows"][2][1], f"Excluidos: {total_excluded}" if self.lang == "es" else f"Excluded: {total_excluded}", T["prisma_rows"][2][2]),
+            ("4. " + ("Inclusión Final" if self.lang == "es" else "Final Inclusion"), T["prisma_rows"][3][1], f"N = {total_mapped}", T["prisma_rows"][3][2]),
         ]
 
         for i, row in enumerate(datos_prisma):
             for c_idx in range(4):
-                t_prisma.rows[i+1].cells[c_idx].paragraphs[0].text = row[c_idx]
+                t_prisma.rows[i + 1].cells[c_idx].paragraphs[0].text = row[c_idx]
 
         style_academic_table(t_prisma, [Inches(1.3), Inches(2.5), Inches(1.1), Inches(1.6)])
 
-        # 4. SECCIÓN III: RESULTADOS Y TAXONOMÍA DEL MAPEO
-        self.add_heading_1(doc, "III. RESULTADOS: TAXONOMÍA Y DINÁMICA TEMPORAL")
-        self.add_p(doc, 
-            "El agrupamiento vectorial no supervisado acoplado a c-TF-IDF y el análisis de trayectorias temporales "
-            "permitieron caracterizar la estructura temática del corpus y su tasa de crecimiento anual compuesta (CAGR).")
+        self.add_heading_1(doc, T["headings"]["results"])
+        self.add_p(doc, T["results"])
 
-        # Tabla de Taxonomías con Dinámica Temporal
         t_tax = doc.add_table(rows=1 + len(topics_info), cols=6)
-        t_tax.rows[0].cells[0].paragraphs[0].text = "ID"
-        t_tax.rows[0].cells[1].paragraphs[0].text = "Taxonomía / Tópico Descubierto"
-        t_tax.rows[0].cells[2].paragraphs[0].text = "Artículos"
-        t_tax.rows[0].cells[3].paragraphs[0].text = "%"
-        t_tax.rows[0].cells[4].paragraphs[0].text = "Dinámica y CAGR"
-        t_tax.rows[0].cells[5].paragraphs[0].text = "Descriptores Léxicos (c-TF-IDF)"
+        for c_idx, h in enumerate(T["tax_headers"]):
+            t_tax.rows[0].cells[c_idx].paragraphs[0].text = h
 
         for r_idx, (tid, info) in enumerate(sorted(topics_info.items(), key=lambda x: int(x[0]))):
-            status = " [Excluido]" if info.get("exclude_prisma", False) else ""
+            status = T["excluded"] if info.get("exclude_prisma", False) else ""
             t_dyn = info.get("temporal_dynamics", {})
-            badge = t_dyn.get("badge", "⚖️ Maduro")
+            badge = t_dyn.get("badge", "")
             cagr = t_dyn.get("cagr_percent", 0.0)
 
-            t_tax.rows[r_idx+1].cells[0].paragraphs[0].text = str(tid)
-            t_tax.rows[r_idx+1].cells[1].paragraphs[0].text = f"{info.get('assigned_name')}{status}"
-            t_tax.rows[r_idx+1].cells[2].paragraphs[0].text = str(info.get("count", 0))
-            t_tax.rows[r_idx+1].cells[3].paragraphs[0].text = f"{info.get('percentage', 0)}%"
-            t_tax.rows[r_idx+1].cells[4].paragraphs[0].text = f"{badge} ({cagr:+.1f}%)"
-            t_tax.rows[r_idx+1].cells[5].paragraphs[0].text = ", ".join(info.get("keywords", [])[:5])
+            t_tax.rows[r_idx + 1].cells[0].paragraphs[0].text = str(tid)
+            t_tax.rows[r_idx + 1].cells[1].paragraphs[0].text = f"{info.get('assigned_name')}{status}"
+            t_tax.rows[r_idx + 1].cells[2].paragraphs[0].text = str(info.get("count", 0))
+            t_tax.rows[r_idx + 1].cells[3].paragraphs[0].text = f"{info.get('percentage', 0)}%"
+            t_tax.rows[r_idx + 1].cells[4].paragraphs[0].text = f"{badge} ({cagr:+.1f}%)"
+            t_tax.rows[r_idx + 1].cells[5].paragraphs[0].text = ", ".join(info.get("keywords", [])[:5])
 
         style_academic_table(t_tax, [Inches(0.4), Inches(2.0), Inches(0.7), Inches(0.5), Inches(1.4), Inches(1.5)])
 
-        self.add_p(doc, 
-            "Como se observa en la tabla precedente, los tópicos catalogados como 'Emergentes' (🚀) exhiben una marcada aceleración "
-            "en su volumen de publicaciones en los últimos 3 años (CAGR > 12%), reflejando las líneas de frontera investigativa. "
-            "Por su parte, los tópicos 'Maduros' (⚖️) representan los fundamentos metodológicos consolidados de la disciplina.",
-            italic=True)
+        self.add_p(doc, T["results_note"], italic=True)
 
-        # 5. SECCIÓN IV: DISCUSIÓN CUALITATIVA
-        self.add_heading_1(doc, "IV. DISCUSIÓN Y SÍNTESIS CUALITATIVA")
-        self.add_p(doc, 
-            "Para complementar la visión macroscópica del mapeo, se realizó un análisis cualitativo a texto completo "
-            "sobre una muestra intencional estratificada de artículos representativos (medoides y publicaciones de alto impacto). "
-            "Esta síntesis responde a las metodologías empíricas y vacíos planteados en las RQs.")
+        self.add_heading_1(doc, T["headings"]["discussion"])
+        self.add_p(doc, T["discussion"])
 
         selected_papers = [c for c in candidates if c.get("selected_for_deep_review", False)]
         if not selected_papers and candidates:
-            # Si el usuario no marcó ninguno aún, tomar el top 1 de cada tópico
             selected_papers = [c for c in candidates if c.get("rank_in_topic", 1) == 1]
 
-        # Tabla de Artículos Seleccionados
-        self.add_heading_2(doc, "Matriz de Artículos Analizados a Texto Completo")
+        self.add_heading_2(doc, T["headings"]["matrix"])
         t_sel = doc.add_table(rows=1 + len(selected_papers), cols=5)
-        t_sel.rows[0].cells[0].paragraphs[0].text = "Ref"
-        t_sel.rows[0].cells[1].paragraphs[0].text = "Artículo / Autores"
-        t_sel.rows[0].cells[2].paragraphs[0].text = "Año | Citas"
-        t_sel.rows[0].cells[3].paragraphs[0].text = "Tópico"
-        t_sel.rows[0].cells[4].paragraphs[0].text = "Técnica / Aporte Principal"
+        for c_idx, h in enumerate(T["sel_headers"]):
+            t_sel.rows[0].cells[c_idx].paragraphs[0].text = h
 
         for p_idx, p_data in enumerate(selected_papers):
-            t_sel.rows[p_idx+1].cells[0].paragraphs[0].text = f"P{p_idx+1}"
-            t_sel.rows[p_idx+1].cells[1].paragraphs[0].text = f"{p_data.get('title')}\n({p_data.get('authors')[:40]}...)"
-            t_sel.rows[p_idx+1].cells[2].paragraphs[0].text = f"{p_data.get('publication_year')} | {p_data.get('cited_by_count')} citas"
-            t_sel.rows[p_idx+1].cells[3].paragraphs[0].text = str(p_data.get("topic_name"))[:25]
-            t_sel.rows[p_idx+1].cells[4].paragraphs[0].text = "[Completar técnica y aporte específico]"
+            t_sel.rows[p_idx + 1].cells[0].paragraphs[0].text = f"P{p_idx + 1}"
+            t_sel.rows[p_idx + 1].cells[1].paragraphs[0].text = f"{p_data.get('title')}\n({str(p_data.get('authors'))[:40]}...)"
+            t_sel.rows[p_idx + 1].cells[2].paragraphs[0].text = f"{p_data.get('publication_year')} | {p_data.get('cited_by_count')} citas" if self.lang == "es" else f"{p_data.get('publication_year')} | {p_data.get('cited_by_count')} citations"
+            t_sel.rows[p_idx + 1].cells[3].paragraphs[0].text = str(p_data.get("topic_name"))[:25]
+            t_sel.rows[p_idx + 1].cells[4].paragraphs[0].text = T["technique_placeholder"]
 
         style_academic_table(t_sel, [Inches(0.5), Inches(2.6), Inches(1.0), Inches(1.1), Inches(1.3)])
 
-        # Subsecciones por artículo para redactar hallazgos
         for p_idx, p_data in enumerate(selected_papers):
-            self.add_heading_2(doc, f"Análisis de P{p_idx+1}: {p_data.get('title')}")
-            self.add_p(doc, f"Autores: {p_data.get('authors')} ({p_data.get('publication_year')}). Publicado en: {p_data.get('venue')}. DOI: {p_data.get('doi')}")
-            self.add_p(doc, p_data.get('abstract', ''), bold_prefix="Síntesis del Abstract: ", italic=True)
-            self.add_p(doc, 
-                f"[Espacio para el investigador]: Describir aquí los hallazgos empíricos clave de este estudio en relación con {list(self.rqs.keys())[0] if self.rqs else 'las RQs'}. "
-                f"Evaluar el rigor de su validación experimental y las limitaciones identificadas por los autores.",
-                bold_prefix="Hallazgos Empíricos y Limitaciones: ")
+            self.add_heading_2(doc, f"{'Análisis' if self.lang == 'es' else 'Analysis'} de P{p_idx + 1}: {p_data.get('title')}")
+            self.add_p(doc, f"Autores: {p_data.get('authors')} ({p_data.get('publication_year')}). " if self.lang == "es" else f"Authors: {p_data.get('authors')} ({p_data.get('publication_year')}). " +
+                       f"Publicado en: {p_data.get('venue')}. DOI: {p_data.get('doi')}" if self.lang == "es" else f"Published in: {p_data.get('venue')}. DOI: {p_data.get('doi')}")
+            self.add_p(doc, p_data.get('abstract', ''), bold_prefix=T["abstract_prefix"], italic=True)
+            rq0 = list(self.rqs.keys())[0] if self.rqs else ("las RQs" if self.lang == "es" else "the RQs")
+            self.add_p(doc, T["findings_space"].format(rq=rq0), bold_prefix=T["findings_label"])
 
-        # 6. SECCIÓN V: AMENAZAS A LA VALIDEZ
-        self.add_heading_1(doc, "V. AMENAZAS A LA VALIDEZ")
-        self.add_p(doc, "Sesgo de cobertura en fuentes bibliográficas y sensibilidad de las consultas de búsqueda.", bold_prefix="• Validez de Construcción: ")
-        self.add_p(doc, "Posibles sesgos en la interpretación humana durante el nombramiento de clusters y selección de papers para la discusión profunda.", bold_prefix="• Validez Interna: ")
-        self.add_p(doc, "Generalizabilidad de los patrones taxonómicos a entornos industriales no documentados formalmente en la literatura indexada.", bold_prefix="• Validez Externa: ")
+        self.add_heading_1(doc, T["headings"]["threats"])
+        self.add_p(doc, T["threats"]["construction"], bold_prefix=T["threats_labels"]["construction"])
+        self.add_p(doc, T["threats"]["internal"], bold_prefix=T["threats_labels"]["internal"])
+        self.add_p(doc, T["threats"]["external"], bold_prefix=T["threats_labels"]["external"])
 
-        # 7. SECCIÓN VI: CONCLUSIONES
-        self.add_heading_1(doc, "VI. CONCLUSIONES Y TRABAJO FUTURO")
-        self.add_p(doc, 
-            "El mapeo sistemático ha permitido sintetizar de manera estructurada y auditable el estado del arte en el dominio. "
-            "La integración de modelos de lenguaje densos con supervisión humana experta ofreció un balance óptimo entre "
-            "exhaustividad de cobertura y precisión interpretativa, identificando oportunidades prometedoras para futuras investigaciones.")
+        self.add_heading_1(doc, T["headings"]["conclusions"])
+        self.add_p(doc, T["conclusions"])
 
-        # Guardar archivo con manejo de fallback
-        out_docx = os.path.join(self.output_dir, f"{self.meta.get('short_name', 'Mapeo_Sistematico')}_BORRADOR.docx")
+        out_docx = os.path.join(self.output_dir, f"{self.meta.get('short_name', 'Systematic_Mapping')}_BORRADOR.docx")
         try:
             doc.save(out_docx)
             print(f"✔ Documento Word formal guardado exitosamente en: {out_docx}")
             return out_docx
         except PermissionError:
-            fallback = os.path.join(self.output_dir, f"{self.meta.get('short_name', 'Mapeo_Sistematico')}_BORRADOR_NUEVO.docx")
+            fallback = os.path.join(self.output_dir, f"{self.meta.get('short_name', 'Systematic_Mapping')}_BORRADOR_NUEVO.docx")
             doc.save(fallback)
             print(f"⚠️ El archivo original estaba abierto en Word. Guardado en fallback: {fallback}")
             return fallback
