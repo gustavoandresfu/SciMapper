@@ -20,6 +20,7 @@ build/
 dist/
 *.egg-info/
 .eggs/
+SciMapper_Portable.zip
 
 # IDE & OS files
 .vscode/
