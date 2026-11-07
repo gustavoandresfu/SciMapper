@@ -77,6 +77,8 @@ def cmd_init(target_path: str = "sms_config.json", quick: bool = False):
 
     # Si se pide quick o no hay terminal interactiva (TTY), copiar plantilla estándar
     if quick or not sys.stdin.isatty():
+        sn = cfg.get("project_metadata", {}).get("short_name", "SMS_Proyecto")
+        cfg.setdefault("project_metadata", {})["output_dir"] = f"./output_{sn}"
         with open(target_path, "w", encoding="utf-8") as f:
             json.dump(cfg, f, indent=2, ensure_ascii=False)
         print(f"✅ Plantilla estándar creada con éxito en: {target_path}")
@@ -166,6 +168,7 @@ def cmd_init(target_path: str = "sms_config.json", quick: bool = False):
     # Actualizar la configuración
     cfg["project_metadata"]["title"] = title
     cfg["project_metadata"]["short_name"] = short_name
+    cfg["project_metadata"]["output_dir"] = f"./output_{short_name}"
     cfg["project_metadata"]["authors"] = [a.strip() for a in author.split(",")]
     cfg["search_strategy"]["openalex_email"] = email
     cfg["nlp_tuning"]["domain_preset"] = chosen_preset
@@ -358,6 +361,50 @@ def cmd_web():
     except KeyboardInterrupt:
         print("\n🛑 Servidor detenido.")
 
+def cmd_wizard(config_path: str):
+    print("=" * 70)
+    print("🧙 ASISTENTE COMPLETO (Wizard) - SciMapper")
+    print("=" * 70)
+
+    if not os.path.exists(config_path):
+        print("📝 No existe configuración. Se iniciará el asistente de inicialización.")
+        cmd_init(config_path, quick=not sys.stdin.isatty())
+
+    config = load_config(config_path)
+
+    print("\n👉 Fase 1: Discovery (recolección, embeddings, clustering)")
+    cmd_run_discovery(config, config_path)
+
+    print("\n" + "=" * 70)
+    print("🧑‍💻 PASO HUMANO (Human-in-the-Loop)")
+    print("=" * 70)
+    print("1. Abre 'discovered_topics.json' y asigna nombres en 'assigned_name'.")
+    print("   Marca 'exclude_prisma': true si un tópico no corresponde.")
+    print("2. Abre 'candidatos_discusion.json' y marca 'selected_for_deep_review': true")
+    print("   en los artículos que leerás a texto completo.")
+    output_dir = config.get("project_metadata", {}).get("output_dir", "./output")
+    print(f"\n📂 Archivos en: {output_dir}")
+    try:
+        input("\nPresiona [Enter] cuando hayas terminado la revisión para continuar...")
+    except (EOFError, KeyboardInterrupt):
+        print("\nOperación cancelada.")
+        return
+
+    config = load_config(config_path)
+    print("\n👉 Fase 2: Compile (mapa interactivo + reporte PRISMA)")
+    cmd_compile(config)
+
+    print("\n👉 Fase 3: Build doc (borrador Word)")
+    cmd_build_doc(config)
+
+    print("\n" + "=" * 70)
+    print("🎉 WIZARD COMPLETADO")
+    print("=" * 70)
+    print(f"📂 Salida: {output_dir}")
+    print("   - mapa_interactivo.html")
+    print("   - *_BORRADOR.docx")
+    print("   - prisma_summary_report.txt")
+
 def main():
     parser = argparse.ArgumentParser(
         description="SciMapper: Automated Scientific Mapping & Systematic Literature Reviews with Dense Semantic Clustering.",
@@ -374,12 +421,17 @@ def main():
     parser.add_argument("--version", action="version", version=f"SciMapper {__version__}")
     parser.add_argument("--verbose", action="store_true", help="Activa salida detallada (logging DEBUG).")
     parser.add_argument("--web", action="store_true", help="Inicia la app web (Streamlit) para usar el pipeline desde el navegador.")
+    parser.add_argument("--wizard", action="store_true", help="Ejecuta el asistente completo en consola (init + discovery + compile + build doc).")
 
     args = parser.parse_args()
     setup_logging(verbose=getattr(args, "verbose", False))
 
     if args.web:
         cmd_web()
+        return
+
+    if args.wizard:
+        cmd_wizard(args.config)
         return
 
     if args.init:
