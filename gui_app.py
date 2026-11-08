@@ -6,11 +6,27 @@ import json
 import threading
 import queue
 
+# ---- Splash screen (shown before heavy imports) ----
+import tkinter as tk
+from tkinter import ttk
+
+_splash = tk.Tk()
+_splash.overrideredirect(True)
+_splash.geometry("420x160")
+_splash.configure(bg="#1e3a8a")
+_sw = _splash.winfo_screenwidth()
+_sh = _splash.winfo_screenheight()
+_splash.geometry(f"420x160+{(_sw-420)//2}+{(_sh-160)//2}")
+tk.Label(_splash, text="SciMapper", font=("Segoe UI", 24, "bold"), fg="white", bg="#1e3a8a").pack(pady=(30, 5))
+tk.Label(_splash, text="Cargando interfaz...", font=("Segoe UI", 11), fg="#93c5fd", bg="#1e3a8a").pack()
+_pb = ttk.Progressbar(_splash, mode="indeterminate", length=300)
+_pb.pack(pady=15)
+_pb.start(10)
+_splash.update()
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import customtkinter as ctk
-from core.utils import validate_config
-from main import cmd_run_discovery, cmd_compile, cmd_build_doc
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "core", "config_template.json")
 DOMAIN_PRESETS = {
@@ -84,6 +100,16 @@ class SciMapperGUI(ctk.CTk):
 
         app_state["cfg"] = load_template()
         app_state["log_queue"] = queue.Queue()
+
+        # Auto-load existing config in the working directory
+        for candidate in ("sms_config.json", "config.json"):
+            if os.path.exists(candidate):
+                try:
+                    with open(candidate, "r", encoding="utf-8") as f:
+                        app_state["cfg"] = json.load(f)
+                    break
+                except Exception:
+                    pass
 
         self.container = ctk.CTkFrame(self)
         self.container.pack(fill="both", expand=True, padx=10, pady=10)
@@ -209,6 +235,7 @@ class SciMapperGUI(ctk.CTk):
     def step_review(self, parent):
         ctk.CTkLabel(parent, text="6) Revisión y ejecución", font=ctk.CTkFont(size=18, weight="bold")).pack(pady=10)
         cfg = app_state["cfg"]
+        from core.utils import validate_config
         errors = validate_config(cfg)
         if errors:
             ctk.CTkLabel(parent, text=t("invalid"), text_color="red").pack()
@@ -292,6 +319,7 @@ class SciMapperGUI(ctk.CTk):
 
             buf = Writer()
             try:
+                from main import cmd_run_discovery, cmd_compile, cmd_build_doc
                 with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
                     if task == "discovery":
                         cmd_run_discovery(cfg, config_path)
@@ -339,6 +367,11 @@ class SciMapperGUI(ctk.CTk):
 
 
 def main():
+    try:
+        _pb.stop()
+        _splash.destroy()
+    except Exception:
+        pass
     app = SciMapperGUI()
     app.mainloop()
 
