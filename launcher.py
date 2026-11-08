@@ -24,13 +24,19 @@ if "--web" in sys.argv:
     print("=" * 70)
     sys.exit(0)
 
-if run_cli:
-    import main
-    main.main()
-else:
-    # Default: GUI desktop
-    import gui_app
-    gui_app.main()
+try:
+    if run_cli:
+        import main
+        main.main()
+    else:
+        # Default: GUI desktop
+        import gui_app
+        gui_app.main()
+except Exception as e:
+    import traceback
+    with open(os.path.join(exe_dir, "error.log"), "w", encoding="utf-8") as f:
+        f.write(traceback.format_exc())
+    raise
 
 # Cleanup unused artifacts
 for folder in ("__pycache__", "build"):
