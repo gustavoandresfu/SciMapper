@@ -116,13 +116,15 @@ class AutoVisualizer:
             hover_texts = []
             for _, r_doc in sub.iterrows():
                 snip = (r_doc['abstract'][:240] + "...") if len(r_doc['abstract']) > 240 else r_doc['abstract']
+                doi = str(r_doc.get('doi', '') or '').strip()
+                doi_link = f"<br><a href='{doi}' target='_blank'>DOI</a>" if doi else ""
                 txt = (
                     f"<b>{r_doc['title']}</b><br>"
                     f"<i>Autores:</i> {r_doc['authors']}<br>"
                     f"<i>Año:</i> {r_doc['publication_year']} | <i>Venue:</i> {r_doc['venue']}<br>"
                     f"<i>Citas:</i> {r_doc.get('cited_by_count', 0)} | <b>Estado:</b> {badge} (CAGR: {cagr}%)<br>"
                     f"<hr style='margin:4px 0;'>"
-                    f"<b>Abstract:</b> {snip}"
+                    f"<b>Abstract:</b> {snip}{doi_link}"
                 )
                 hover_texts.append(txt)
 
@@ -163,6 +165,18 @@ class AutoVisualizer:
             )
             fig.add_trace(centroid_trace, row=1, col=1)
             centroid_trace_indices.append(len(fig.data) - 1)
+
+            # Etiqueta de nombre del cluster sobre el centroide
+            fig.add_annotation(
+                x=cx,
+                y=cy,
+                text=f"<b>{t_name[:28]}</b>",
+                showarrow=False,
+                xanchor="center",
+                yanchor="bottom",
+                yshift=18,
+                font=dict(size=9, color=color, family="Segoe UI, Arial, sans-serif"),
+            )
 
         # 3. Subplot 2: Evolución Temporal Anual (Líneas de tendencia)
         years_series = pd.to_numeric(df["publication_year"], errors="coerce").dropna().astype(int)
@@ -271,7 +285,11 @@ class AutoVisualizer:
         )
 
         out_html = os.path.join(self.output_dir, "mapa_interactivo.html")
-        fig.write_html(out_html, config={"responsive": True, "displayModeBar": True})
+        fig.write_html(out_html, config={
+            "responsive": True,
+            "displayModeBar": True,
+            "toImageButtonOptions": {"format": "png", "filename": "mapa_interactivo", "scale": 2},
+        })
         print(f"✔ Dashboard Dual interactivo generado en: {out_html}")
         return out_html
 
