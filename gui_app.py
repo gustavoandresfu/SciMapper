@@ -13,6 +13,11 @@ from tkinter import ttk
 splash = tk.Tk()
 splash.overrideredirect(True)
 splash.configure(bg="#1e3a8a")
+splash.attributes("-topmost", True)
+try:
+    splash.grab_set()
+except Exception:
+    pass
 _sw = splash.winfo_screenwidth()
 _sh = splash.winfo_screenheight()
 splash.geometry(f"420x160+{(_sw-420)//2}+{(_sh-160)//2}")
@@ -316,6 +321,18 @@ class SciMapperGUI(ctk.CTk):
         self.set_buttons_state("disabled")
         self.progress.set(0.2)
         self.log(">> " + task)
+
+        # Modal loading dialog
+        self.loading_dialog = ctk.CTkToplevel(self)
+        self.loading_dialog.title("Cargando")
+        self.loading_dialog.geometry("320x130")
+        self.loading_dialog.transient(self)
+        self.loading_dialog.grab_set()
+        ctk.CTkLabel(self.loading_dialog, text=t("running"), font=ctk.CTkFont(size=14)).pack(pady=15)
+        dlg_pb = ctk.CTkProgressBar(self.loading_dialog)
+        dlg_pb.pack(fill="x", padx=20, pady=5)
+        dlg_pb.start()
+        self.loading_dialog.lift()
         cfg = app_state["cfg"]
         config_path = "sms_config.json"
         with open(config_path, "w", encoding="utf-8") as f:
@@ -357,6 +374,11 @@ class SciMapperGUI(ctk.CTk):
                     app_state["running"] = False
                     self.set_buttons_state("normal")
                     self.progress.set(1.0)
+                    try:
+                        if hasattr(self, "loading_dialog") and self.loading_dialog.winfo_exists():
+                            self.loading_dialog.destroy()
+                    except Exception:
+                        pass
                     self.log(">> " + t("done"))
                 else:
                     self.log(msg)
