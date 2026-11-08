@@ -14,8 +14,10 @@ splash = tk.Tk()
 splash.overrideredirect(True)
 splash.configure(bg="#1e3a8a")
 splash.attributes("-topmost", True)
+splash.update_idletasks()
 try:
     splash.grab_set()
+    splash.focus_force()
 except Exception:
     pass
 _sw = splash.winfo_screenwidth()
@@ -328,6 +330,10 @@ class SciMapperGUI(ctk.CTk):
         self.loading_dialog.geometry("320x130")
         self.loading_dialog.transient(self)
         self.loading_dialog.grab_set()
+        self.loading_dialog.update_idletasks()
+        x = self.winfo_x() + (self.winfo_width() - 320) // 2
+        y = self.winfo_y() + (self.winfo_height() - 130) // 2
+        self.loading_dialog.geometry(f"320x130+{x}+{y}")
         ctk.CTkLabel(self.loading_dialog, text=t("running"), font=ctk.CTkFont(size=14)).pack(pady=15)
         dlg_pb = ctk.CTkProgressBar(self.loading_dialog)
         dlg_pb.pack(fill="x", padx=20, pady=5)
