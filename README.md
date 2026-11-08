@@ -130,8 +130,28 @@ The generated `sms_config.json` is ready to inspect and refine:
 
 ### 3. Run the Automated Pipeline
 
-Execute the discovery phase:
+**Console wizard (recommended for first-time users):**
+```bash
+python main.py --wizard
+# or
+run_wizard.bat
+```
 
+**Desktop GUI (if running from source):**
+```bash
+python gui_app.py
+# or
+run_gui.bat
+```
+
+**Web app (Streamlit):**
+```bash
+python main.py --web
+# or
+run_web.bat
+```
+
+**Discovery phase only:**
 ```bash
 python main.py --run-discovery --config sms_config.json
 ```
