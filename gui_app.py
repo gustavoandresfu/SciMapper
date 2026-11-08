@@ -6,27 +6,42 @@ import json
 import threading
 import queue
 
-# ---- Splash screen (shown before heavy imports) ----
+# ---- Splash screen (animated, centered) ----
 import tkinter as tk
 from tkinter import ttk
 
-_splash = tk.Tk()
-_splash.overrideredirect(True)
-_splash.geometry("420x160")
-_splash.configure(bg="#1e3a8a")
-_sw = _splash.winfo_screenwidth()
-_sh = _splash.winfo_screenheight()
-_splash.geometry(f"420x160+{(_sw-420)//2}+{(_sh-160)//2}")
-tk.Label(_splash, text="SciMapper", font=("Segoe UI", 24, "bold"), fg="white", bg="#1e3a8a").pack(pady=(30, 5))
-tk.Label(_splash, text="Cargando interfaz...", font=("Segoe UI", 11), fg="#93c5fd", bg="#1e3a8a").pack()
-_pb = ttk.Progressbar(_splash, mode="indeterminate", length=300)
-_pb.pack(pady=15)
-_pb.start(10)
-_splash.update()
+splash = tk.Tk()
+splash.overrideredirect(True)
+splash.configure(bg="#1e3a8a")
+_sw = splash.winfo_screenwidth()
+_sh = splash.winfo_screenheight()
+splash.geometry(f"420x160+{(_sw-420)//2}+{(_sh-160)//2}")
+tk.Label(splash, text="SciMapper", font=("Segoe UI", 24, "bold"), fg="white", bg="#1e3a8a").pack(pady=(28, 4))
+tk.Label(splash, text="Cargando interfaz...", font=("Segoe UI", 11), fg="#93c5fd", bg="#1e3a8a").pack()
+pb = ttk.Progressbar(splash, mode="indeterminate", length=300)
+pb.pack(pady=12)
+pb.start(8)
+splash.update_idletasks()
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-import customtkinter as ctk
+_heavy = {}
+
+
+def _load_heavy():
+    import customtkinter as ctk_mod
+    _heavy["ctk"] = ctk_mod
+    try:
+        pb.stop()
+    except Exception:
+        pass
+    splash.after(0, splash.destroy)
+
+
+threading.Thread(target=_load_heavy, daemon=True).start()
+splash.mainloop()
+
+ctk = _heavy["ctk"]
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "core", "config_template.json")
 DOMAIN_PRESETS = {
@@ -367,11 +382,6 @@ class SciMapperGUI(ctk.CTk):
 
 
 def main():
-    try:
-        _pb.stop()
-        _splash.destroy()
-    except Exception:
-        pass
     app = SciMapperGUI()
     app.mainloop()
 
