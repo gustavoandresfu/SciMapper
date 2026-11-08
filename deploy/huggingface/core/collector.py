@@ -70,7 +70,20 @@ class AutoCollector:
                     with urllib.request.urlopen(req, timeout=30) as resp:
                         data = json.loads(resp.read().decode("utf-8"))
                     break
-                except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+                except urllib.error.HTTPError as e:
+                    if e.code == 429:
+                        retry_after = e.headers.get("Retry-After")
+                        try:
+                            wait = int(retry_after) if retry_after else (5 * attempt)
+                        except (TypeError, ValueError):
+                            wait = 5 * attempt
+                        logger.warning("HTTP 429 en página %d (intento %d/%d). Esperando %ds...", page, attempt, max_retries, wait)
+                        time.sleep(wait)
+                    else:
+                        wait = 2 ** attempt
+                        logger.warning("Error HTTP %s página %d (intento %d/%d). Reintentando en %ds", e.code, page, attempt, max_retries, wait)
+                        time.sleep(wait)
+                except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
                     wait = 2 ** attempt
                     logger.warning("Error página %d (intento %d/%d): %s. Reintentando en %ds", page, attempt, max_retries, e, wait)
                     time.sleep(wait)
@@ -115,7 +128,7 @@ class AutoCollector:
                     break
 
             page += 1
-            time.sleep(0.3)
+            time.sleep(1.0)
 
         logger.info("✔ %d registros con abstract obtenidos.", len(results))
         return results
@@ -124,7 +137,9 @@ class AutoCollector:
         print("\n🚀 INICIANDO RECOLECCIÓN AUTOMATIZADA DE LITERATURA...")
         all_records = []
         queries = self.strategy.get("queries", [])
-        for q in queries:
+        for i, q in enumerate(queries):
+            if i > 0:
+                time.sleep(1.0)
             recs = self.fetch_from_openalex(q)
             all_records.extend(recs)
 
