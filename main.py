@@ -100,6 +100,11 @@ def cmd_init(target_path: str = "sms_config.json", quick: bool = False):
             print("\nOperación cancelada.")
             sys.exit(0)
 
+    # 0. Idioma del documento
+    lang_choice = prompt("0. Idioma del documento (1=Español, 2=English)", "1")
+    lang = "es" if lang_choice != "2" else "en"
+    cfg.setdefault("project_metadata", {})["language"] = lang
+
     # 1. Metadatos
     title = prompt("1. Título formal del estudio", cfg.get("project_metadata", {}).get("title", "Mapeo Sistemático"))
     short_name = prompt("2. Identificador corto del proyecto", "SMS_Estudio")

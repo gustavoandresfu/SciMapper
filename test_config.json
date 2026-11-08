@@ -1,38 +1,55 @@
 {
   "project_metadata": {
-    "title": "Mapeo Sistemático de la Literatura: Generative AI in Software Testing",
-    "short_name": "SMS_GenAI_Testing",
-    "authors": ["Investigador Principal", "Coautor"],
-    "temporal_window": [2019, 2026],
-    "output_dir": "./output_test"
+    "title": "Mapeo Sistemático de la Literatura: Convergencia Tecnológica y Narrativas Transmedia en Educación",
+    "short_name": "SMS_Transmedia_Educacion",
+    "authors": [
+      "Tesista / Investigador",
+      "Director de Tesis"
+    ],
+    "temporal_window": [
+      2021,
+      2026
+    ],
+    "output_dir": "./output_transmedia_edu"
   },
   "research_questions": {
-    "RQ1": "¿Cuáles son las técnicas de modelos de lenguaje más utilizadas para la generación de casos de prueba?",
-    "RQ2": "¿Qué métricas empíricas de cobertura de código y tasa de detección de fallos se reportan?",
-    "RQ3": "¿Cuáles son los desafíos éticos, alucinaciones y limitaciones de reproducibilidad observadas?"
+    "RQ1": "¿Cómo se integran las narrativas transmedia y la convergencia tecnológica en las prácticas pedagógicas y los procesos de enseñanza-aprendizaje?",
+    "RQ2": "¿Qué competencias mediáticas, digitales y de alfabetismo transmedia (transmedia literacy) se fomentan en estudiantes y docentes?",
+    "RQ3": "¿Cuáles son las principales barreras pedagógicas, brechas tecnológicas y desafíos metodológicos documentados en las experiencias educativas transmedia?"
   },
   "search_strategy": {
     "openalex_email": "academic_researcher@universidad.edu",
-    "max_results_per_query": 35,
+    "max_results_per_query": 50,
     "queries": [
-      "\"generative ai\" AND \"software testing\"",
-      "\"large language models\" AND \"test case generation\""
+      "\"transmedia storytelling\" AND \"education\"",
+      "\"transmedia\" AND (\"learning\" OR \"pedagogy\")",
+      "\"technological convergence\" AND \"education\"",
+      "\"transmedia literacy\" AND (\"schools\" OR \"higher education\")",
+      "\"participatory culture\" AND (\"education\" OR \"learning\")",
+      "\"narrative expansion\" AND (\"transmedia\" OR \"education\")",
+      "(\"design\" OR \"planning\" OR \"production\") AND \"multiplatform experience\" AND \"education\"",
+      "\"multiplatform\" AND (\"design\" OR \"production\") AND \"transmedia\" AND \"education\"",
+      "(\"design\" OR \"production\") AND \"cross-platform experience\" AND (\"education\" OR \"learning\")"
     ]
   },
   "nlp_tuning": {
-    "domain_preset": "software_engineering",
+    "domain_preset": "scientific_general",
     "domain_presets_catalog": {
-      "software_engineering": "sentence-transformers/all-MiniLM-L6-v2",
-      "biomedical_health": "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract"
+      "multilingual": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "scientific_general": "allenai/scibert_scivocab_uncased",
+      "general_english": "sentence-transformers/all-MiniLM-L6-v2"
     },
-    "n_clusters": 4,
+    "n_clusters": 6,
     "dimensionality_reduction": "pca_tsne"
   },
   "qualitative_synthesis": {
     "candidates_per_topic": 3
   },
   "prisma_audit": {
-    "deduplication_keys": ["doi", "title_hash"],
+    "deduplication_keys": [
+      "doi",
+      "title_hash"
+    ],
     "quality_threshold": 3.5
   }
 }
